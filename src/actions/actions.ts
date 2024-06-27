@@ -26,6 +26,7 @@ export const addStudent =  async (data : TStudent) => {
       parent_mobile_number : data.contact_num,
     })
   } catch (error) {
+    console.log(error)
     return {
       error : 'Something Went Wrong'
     }
