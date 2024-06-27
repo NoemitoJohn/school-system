@@ -247,7 +247,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
       </div>
       <div className="flex justify-center">
 
-        <Button type='submit'>
+        <Button type='submit' disabled={isSubmitting}>
           <div className="flex items-center gap-1">
             <Save />
               {isSubmitting ?  <p>Loading...</p> : <p>Save</p>}
