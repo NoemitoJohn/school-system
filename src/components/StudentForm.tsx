@@ -104,7 +104,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
         <div className="border-slate-400 border-b">
           <p className='font-bold'>Parent Information</p>
         </div>
-        <p className='font-medium text-xs mt-2'>Father's Name</p>
+        <p className='font-medium text-xs mt-2'>Father&apos;s Name</p>
         <div className="flex gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
@@ -123,7 +123,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
             <Input  {...register("parent.father.ext_name")} placeholder='Extension Name'/>
           </div>
         </div>
-        <p className='font-medium text-xs mt-2'>Mother's Maiden Name</p>
+        <p className='font-medium text-xs mt-2'>Mother&apos;s Maiden Name</p>
         
         <div className="flex gap-4">
           <div className='flex-1'>
@@ -139,7 +139,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
             <Input  {...register("parent.mother.middle_name")} placeholder='Middle Name'/>
           </div>
         </div>
-        <p className='font-medium text-xs mt-2'>Guardian's Name</p>
+        <p className='font-medium text-xs mt-2'>Guardian&apos;s Name</p>
         <div className="flex gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
