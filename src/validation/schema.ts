@@ -1,25 +1,28 @@
 import { z } from "zod";
 
-
 const AddressSchema = z.object({
   province : z.string().trim(),
   city : z.string().trim(),
   barangay : z.string().trim(),
-  house_num : z.string().trim(),
+  house_num : z.string().trim().optional(),
 })
-
 
 const ParentSchema = z.object({
   father : z.object({
-    first_name : z.string().trim(),
-    last_name : z.string().trim(),
-    middle_name : z.string().trim(),
-    ext_name : z.string().trim(),
+    first_name : z.string().trim().optional(),
+    last_name : z.string().trim().optional(),
+    middle_name : z.string().trim().optional(),
+    ext_name : z.string().trim().optional(),
   }),
   mother : z.object({
-    first_name : z.string().trim(),
-    last_name : z.string().trim(),
-    middle_name : z.string().trim(),
+    first_name : z.string().trim().optional(),
+    last_name : z.string().trim().optional(),
+    middle_name : z.string().trim().optional(),
+  }),
+  guardian : z.object({
+    first_name : z.string().trim().optional(),
+    last_name : z.string().trim().optional(),
+    middle_name : z.string().trim().optional(),
   })
 })
 

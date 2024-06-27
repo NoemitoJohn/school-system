@@ -1,9 +1,9 @@
 'use client'
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
-import { useFormStatus } from 'react-dom'
 import { Save } from 'lucide-react';
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import toast from 'react-hot-toast';
 import {
   Select,
   SelectContent,
@@ -16,12 +16,18 @@ import { Button } from './ui/button'
 import { StudentSchema, TStudent } from "@/validation/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addStudent } from "@/actions/actions";
+import Dropdown from "./Dropdown";
+import { TBarangay, TCity, TProvince } from "@/app/student/add/page";
+import { useState } from "react";
 
-export default function StudentForm() {
+export default function StudentForm({provinces, city, barangay} : {provinces : TProvince[], city : TCity[], barangay : TBarangay[]}) {
+
   const {
     register,
     handleSubmit,
     control,
+    watch,
+    reset,
     formState : {errors, isSubmitting}
   } = useForm<TStudent>({
     resolver : zodResolver(StudentSchema)
@@ -29,12 +35,23 @@ export default function StudentForm() {
 
   const onSubmit : SubmitHandler<TStudent> = async (data) => {
     const response = await addStudent(data)
-    if(response?.error) {
-    }
-  }
-
-  return (
     
+    if(response?.error) {
+      return toast.error(response.error)
+    }
+
+    toast.success('Save Successfully')
+    reset()
+  }
+  // if edit student get defaul value and form default value
+  {/* 1043 104324 */}
+  const proviceCode = watch('address.province', '')
+  const cityCode = watch('address.city', '')
+
+  const cities = city.filter(c => c.province_code === proviceCode)
+  const barangays = barangay.filter(b => b.city_code === cityCode)
+  return (
+
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <div className="border-slate-400 border-b">
@@ -67,17 +84,7 @@ export default function StudentForm() {
             render={({field, formState : {errors}}) => (
               <>
                 <Label className={`text-xs ${errors.gender && 'text-red-500'}`}>Sex</Label>
-                <Select onValueChange={field.onChange} value={field.value}  >
-                  <SelectTrigger >
-                    <SelectValue placeholder="Select a gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="MALE">MALE</SelectItem>
-                      <SelectItem value="FEMALE">FEMALE</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <Dropdown items={['MALE', 'FEMALE']} onChange={field.onChange} value={field.value} label="Select a gender"/>
               </>
             )}
           />
@@ -117,6 +124,7 @@ export default function StudentForm() {
           </div>
         </div>
         <p className='font-medium text-xs mt-2'>Mother's Maiden Name</p>
+        
         <div className="flex gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
@@ -131,6 +139,21 @@ export default function StudentForm() {
             <Input  {...register("parent.mother.middle_name")} placeholder='Middle Name'/>
           </div>
         </div>
+        <p className='font-medium text-xs mt-2'>Guardian's Name</p>
+        <div className="flex gap-4">
+          <div className='flex-1'>
+            <Label className='text-xs'>Last Name</Label>
+            <Input {...register("parent.guardian.last_name")} placeholder='Last Name'/>
+          </div>
+          <div className='flex-1'>
+            <Label className='text-xs'>First Name</Label>
+            <Input {...register("parent.guardian.first_name")}  placeholder='First Name'/>
+          </div>
+          <div className='flex-1'>
+            <Label className='text-xs'>Middle Name</Label>
+            <Input  {...register("parent.guardian.middle_name")} placeholder='Middle Name'/>
+          </div>
+        </div>
       </div>
 
       <div className='mt-3'>
@@ -141,18 +164,67 @@ export default function StudentForm() {
 
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label className="text-xs">Province</Label>
-              <Input  {...register("address.province")} placeholder="Province"/>
+            
+            <Controller
+              name="address.province"
+              // rules={{required : true}}
+              control={control}
+              render={({field, formState : {errors}}) => (
+                <>
+                  <Label className={`text-xs ${errors.address?.province && 'text-red-500'}`}>Province</Label>
+                  <Dropdown items={provinces} onChange={field.onChange} value={field.value} 
+                    label="Select provinces"
+                    getLabel={ (p) => p.province_name }
+                    getValue={ (p) => p.province_code }
+                  />
+                </>
+              )}
+            />
+
+
+              {/* <Label className="text-xs">Province</Label>
+              <Input  {...register("address.province")} placeholder="Province"/> */}
             </div>
             <div className="flex-1">
-              <Label className="text-xs">Municipality/City</Label>
-              <Input {...register("address.city")} placeholder="Municipality/City"/>
+              <Controller
+                name="address.city"
+                // rules={{required : true}}
+                control={control}
+                render={({field, formState : {errors}}) => (
+                  <>
+                    <Label className={`text-xs ${errors.address?.city && 'text-red-500'}`}>Municipality/City</Label>
+                    <Dropdown items={cities} onChange={field.onChange} value={field.value} 
+                      label="Select City"
+                      getLabel={ (p) => p.city_name }
+                      getValue={ (p) => p.city_code }
+                    />
+                  </>
+                )}
+              />
+
+              {/* <Label className="text-xs">Municipality/City</Label>
+              <Input {...register("address.city")} placeholder="Municipality/City"/> */}
             </div>
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label className="text-xs">Barangay</Label>
-              <Input {...register("address.barangay")} placeholder="Barangay"/>
+              <Controller
+                name="address.barangay"
+                // rules={{required : true}}
+                control={control}
+                render={({field, formState : {errors}}) => (
+                  <>
+                    <Label className={`text-xs ${errors.address?.barangay && 'text-red-500'}`}>Barangay</Label>
+                    <Dropdown items={barangays} onChange={field.onChange} value={field.value} 
+                      label="Select Barangay"
+                      getLabel={ (p) => p.brgy_name }
+                      getValue={ (p) => p.brgy_code }
+                    />
+                  </>
+                )}
+              />
+              {/* <Label className="text-xs">Barangay</Label>
+              <Input {...register("address.barangay")} placeholder="Barangay"/> */}
             </div>
             <div className="flex-1">
               <Label className="text-xs">House#/Street/Sitio/Purok</Label>
