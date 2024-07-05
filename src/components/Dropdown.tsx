@@ -4,14 +4,15 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 export default function Dropdown<T >({onChange, value, items, getLabel, getValue, label } : { 
     onChange? : (...even : any[]) => void,
-    value? : string,
+    value? : string ,
     items : T[],
-    getLabel? : (props : T) => string
-    getValue? : (props : T) => string
+    getLabel? : (props : T) => string  
+    getValue? : (props : T) => string 
     label : string
   }){
 
   return (
+    
     <Select onValueChange={onChange} value={value}>
       <SelectTrigger>
         <SelectValue placeholder={label} />
@@ -31,5 +32,3 @@ export default function Dropdown<T >({onChange, value, items, getLabel, getValue
     </Select>
   )
 }
-
-// Dropdown({items: [{name : 'test', test : 'yawa'}], getLabel : (props) => props.test})

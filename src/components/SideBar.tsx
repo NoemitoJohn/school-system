@@ -5,10 +5,15 @@ export default function SideBar() {
   return (
     <Sidebar>
       <Menu>
-        <SubMenu label="Student">
+        <SubMenu label="Student" defaultOpen >
           <MenuItem component={<Link href='/student/add' />}> Add Student </MenuItem>
           <MenuItem component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
           <MenuItem component={<Link href='/student/print-id' />} > Print ID</MenuItem>
+        </SubMenu>
+      </Menu>
+      <Menu>
+        <SubMenu label="Class" defaultOpen >
+          <MenuItem component={<Link href='/class/add' />}> Add Class </MenuItem>
         </SubMenu>
       </Menu>
     </Sidebar>

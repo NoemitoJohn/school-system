@@ -27,6 +27,7 @@ const ParentSchema = z.object({
 })
 
 export const StudentSchema = z.object({
+  lrn : z.string().trim().min(1),
   first_name : z.string().trim().min(1),
   last_name : z.string().trim().min(1),
   middle_name : z.string().trim().min(1),
@@ -39,5 +40,14 @@ export const StudentSchema = z.object({
   contact_num : z.string().min(10)
 })
 
+export const StudentEnrollmentSchema = z.object({
+  id : z.string().trim().min(1),
+  full_name : z.string().trim().min(1),
+  section : z.string().trim().min(1),
+  grade_level : z.string().trim().min(1),
+  school_year : z.string().trim().min(1),
+})
+
+export type TStudentEnrollmentSchema = z.infer<typeof StudentEnrollmentSchema>
 
 export type TStudent = z.infer<typeof StudentSchema>;

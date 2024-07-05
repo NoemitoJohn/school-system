@@ -3,9 +3,10 @@ import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
 dotenv.config();
 
+
 const client = createClient({
   // url: "file:school.db",
-  url : process.env.DB_URL!,
+  url : process.env.DB_URL!, 
   authToken: process.env.DB_TOKEN,
   
 });

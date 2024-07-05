@@ -8,6 +8,7 @@ export const addStudent =  async (data : TStudent) => {
   
   try {
     await db.insert(students).values({
+      lrn : data.lrn,
       first_name : data.first_name,
       middle_name : data.middle_name,
       last_name : data.last_name,
@@ -26,7 +27,6 @@ export const addStudent =  async (data : TStudent) => {
       parent_mobile_number : data.contact_num,
     })
   } catch (error) {
-    console.log(error)
     return {
       error : 'Something Went Wrong'
     }
