@@ -5,11 +5,10 @@ import { Button } from './ui/button'
 import {  Search } from 'lucide-react';
 import { ColumnDef } from "@tanstack/react-table"
 import DataTable from '@/components/DataTable';
-import Link from 'next/link';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { insertEnrollment, searchStudentEnrollment } from '@/server/students';
-import { ReducerWithoutAction, useEffect, useOptimistic, useReducer, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { searchStudentEnrollment } from '@/server/students';
+import { useEffect, useReducer, useState } from 'react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from '@/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +16,7 @@ import Dropdown from '@/components/Dropdown';
 
 export type TEnromentStudent = {
   id: number
+  lrn : string
   full_name : string
   grade_level : string 
   section : string 
@@ -35,12 +35,13 @@ export type TGradeLevel = {
 export type TSection = {
   id : string 
   section_name : string
+  grade_level_id : string
   school_year : string
 }
 
 
 type TStudentEnrollmentAction = {
-  action : 'INIT' | 'UPDATE' 
+  action : 'INIT' | 'UPDATE' | 'ADD'
   students? : TEnromentStudent[]
   student? : TEnromentStudent
 }
@@ -55,23 +56,30 @@ function studentReducer(state : TEnromentStudent[], action : TStudentEnrollmentA
     case 'UPDATE': 
       if(action.student){
         return state.map(v => {
-          if(v.id == action.student?.id){
+          if(v.id == action.student?.id && action.student.year_enrolled == v.year_enrolled){
             return action.student
           }
           return v
         })
+      }
+    case 'ADD' :
+      if(action.student) {
+        const filter = state.filter((v) => !(v.id == action.student?.id && v.year_enrolled.length <= 0))
+        return [
+          action.student,
+          ...filter
+        ]
       }
     default:
       return state;
   }
 }
 
-export default function Enrollment( {rows, sections, gradeLevel} : {rows : TEnromentStudent[], sections : TSection[], gradeLevel : TGradeLevel[]}) {
+export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnromentStudent[], sections : TSection[], gradeLevel : TGradeLevel[]}) {
 
   const [state, dispatchStudentEnrollment] = useReducer(studentReducer, rows)
-  const [studentId, setStudentId] = useState<number>(7)
+  const [studentId, setStudentId] = useState<number>(0)
   const [open, setOpen] = useState(false)
-
 
   const handleEnrollButtonClick = async (id : number) => {
     setStudentId(id)
@@ -79,6 +87,10 @@ export default function Enrollment( {rows, sections, gradeLevel} : {rows : TEnro
   }
 
   const columns : ColumnDef<TEnromentStudent>[] = [
+    {
+      accessorKey : 'lrn',
+      header : 'LRN'
+    },
     {
       accessorKey : 'full_name',
       header : 'Full Name'
@@ -129,11 +141,16 @@ export default function Enrollment( {rows, sections, gradeLevel} : {rows : TEnro
     }
   } 
   
-  const handleEnrollSubmit : SubmitHandler<TStudentEnrollmentSchema> = async (data) => {
+  const handleEnrollSubmit : SubmitHandler<TStudentEnrollmentSchema> = async (formData) => {
     try {
-      const insertedEnrollment = await insertEnrollment(data)
-      console.log(data)
-      dispatchStudentEnrollment({action : 'UPDATE', student : insertedEnrollment})
+      const request = await fetch('/api/enrollment', {
+        method : 'POST',
+        body : JSON.stringify(formData)
+      })
+      const response : TStudentEnrollmentAction = await request.json()
+      console.log(139, response)
+      
+      dispatchStudentEnrollment(response)
 
     } catch (error) {
       
@@ -164,13 +181,26 @@ export default function Enrollment( {rows, sections, gradeLevel} : {rows : TEnro
   )
 }
 
+
+
+// MODAL COMPONENT
 const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel } : {isOpen : boolean, id : number, sections : TSection[], gradeLevel : TGradeLevel[], handleOpenChange : (open : boolean) => void
   enrollSubmit : SubmitHandler<TStudentEnrollmentSchema>
 }) => {
+
+  const [errorLoad, setErrorLoad] = useState(false)
+  
+  const [sectionsState, setSectionsState] = useState(sections)
+  const [gradeLevelState, setGradelevelState] = useState(gradeLevel)
+  const [schoolYear, setSchoolYear] = useState(sections)
+
+
   const {
     register,
     handleSubmit,
     control,
+    watch,
+    getValues,
     formState : {errors, isSubmitting, isLoading}
   } = useForm<TStudentEnrollmentSchema>({
     resolver : zodResolver(StudentEnrollmentSchema),
@@ -184,9 +214,34 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
       return defValue
     }
   })
-  const [errorLoad, setErrorLoad] = useState(false)
+
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if(type == 'change') {
+        if(name == 'grade_level'){
+          const grade_level_id = value.grade_level
+          const filterSection = sections.filter((v) => v.grade_level_id == grade_level_id)
+          setSectionsState(filterSection)
+        }
+        if(name == 'section') {
+          const section_id = value.section
+          const filterSection = sections.filter((v) => v.id == section_id)
+          setSchoolYear(filterSection)
+        }
+      } else {
+          const section_id = value.section
+          if(section_id) {
+            const filterSection = sections.filter((v) => v.id == section_id)
+            setSchoolYear(filterSection)
+          }
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [watch])
+
   
-  
+
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent>
@@ -209,7 +264,7 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
                       <>
                         <Label className='text-right'>Grade Level</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select Grade Level' items={gradeLevel} onChange={field.onChange} value={field.value}
+                          <Dropdown label='Select Grade Level' items={gradeLevelState} onChange={field.onChange} value={field.value}
                             getValue={(p) => p.id}
                             getLabel={(p) => p.level_name}
                           />
@@ -224,7 +279,7 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
                       <>
                         <Label className='text-right'>Section</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select Section' items={sections} onChange={field.onChange} value={field.value}
+                          <Dropdown label='Select Section' items={sectionsState} onChange={field.onChange} value={field.value}
                             getValue={(p) => p.id}
                             getLabel={(p) => p.section_name}
                           />
@@ -239,7 +294,7 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
                       <>
                         <Label className='text-right'>Section</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select School Year' items={sections} onChange={field.onChange} value={field.value}
+                          <Dropdown label='Select School Year' items={schoolYear} onChange={field.onChange} value={field.value}
                             getValue={(p) => p.school_year}
                             getLabel={(p) => p.school_year}
                           />

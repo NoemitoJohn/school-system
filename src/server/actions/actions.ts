@@ -1,8 +1,9 @@
 'use server'
-
 import { db } from "@/database/db"
-import { students } from "@/database/schema"
-import { TStudent } from "@/validation/schema"
+import { grade_levels, sections, students } from "@/database/schema"
+import { TClassSchema, TStudent } from "@/validation/schema"
+import { eq } from "drizzle-orm"
+import { revalidatePath } from "next/cache"
 
 export const addStudent =  async (data : TStudent) => {
   
@@ -23,7 +24,7 @@ export const addStudent =  async (data : TStudent) => {
       city_municipality : data.address.city,
       barangay : data.address.barangay,
       street_address : data.address.house_num,
-      active: true,
+      active: 1,
       parent_mobile_number : data.contact_num,
     })
   } catch (error) {
@@ -31,4 +32,44 @@ export const addStudent =  async (data : TStudent) => {
       error : 'Something Went Wrong'
     }
   }
+  revalidatePath('/student/enrollment')
+}
+
+
+export const addClass  = async (data : TClassSchema) => {
+  try {
+    await db.transaction( async (tx) => {
+      let gradeLevelId = 0;
+      try {
+        const [getGradeLevel] = await tx.select({
+          id : grade_levels.grade_level_id
+        }).from(grade_levels).where(eq(grade_levels.level_name, data.grade_level_name))
+        
+        gradeLevelId =  getGradeLevel?.id
+        
+        if(!getGradeLevel) {
+          // insert grade level 
+          const [insertGradeLevel] = await tx.insert(grade_levels).values({
+            level_name : data.grade_level_name
+          }).returning()
+
+          gradeLevelId = insertGradeLevel.grade_level_id
+        }
+        console.log(gradeLevelId)
+
+        const section = await tx.insert(sections).values({
+          grade_level_id : gradeLevelId,
+          school_year : data.school_year,
+          section_name : data.section_name,
+          created_by : data.created_by,
+        })
+      } catch (error) {
+        console.log(error)
+        await tx.rollback()
+      }
+    })
+  } catch (error) {
+    
+  }
+  revalidatePath('/class/add')
 }

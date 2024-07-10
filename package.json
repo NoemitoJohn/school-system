@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "drizzle-kit migrate",
-    "generate": "drizzle-kit generate"
+    "generate": "drizzle-kit generate",
+    "push": "drizzle-kit push"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
@@ -17,6 +18,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
+    "@supabase/supabase-js": "^2.44.3",
     "@tanstack/react-table": "^8.19.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -24,6 +26,7 @@
     "drizzle-orm": "^0.31.2",
     "lucide-react": "^0.396.0",
     "next": "14.2.4",
+    "postgres": "^3.4.4",
     "react": "^18.2.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.0",

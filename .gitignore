@@ -36,4 +36,4 @@ school.db
 *.tsbuildinfo
 next-env.d.ts
 
-
+/drizzle-supabase
