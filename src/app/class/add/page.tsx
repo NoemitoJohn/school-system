@@ -7,8 +7,6 @@ import { grade_levels, sections } from '@/database/schema'
 import { asc, eq, sql } from 'drizzle-orm'
 import DataTable from '@/components/DataTable'
 
-
-
 export type TClassName = 
     'GRADE 1' |
     'GRADE 2' |
@@ -23,7 +21,7 @@ export type TClassName =
     'GRADE 11'|
     'GRADE 12' 
 
-export const classes : TClassName[] = [
+const classes : TClassName[] = [
   'GRADE 1',
   'GRADE 2',
   'GRADE 3',
