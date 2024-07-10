@@ -4,12 +4,13 @@ dotenv.config();
 
 export default defineConfig({
   schema: './src/database/schema.ts',
-  out: './src/database/migration',
-  dialect: 'sqlite', // 'postgresql' | 'mysql' | 'sqlite'
-  driver: "turso",
+  out: './src/database/migrations',
+  dialect: 'postgresql', // 'postgresql' | 'mysql' | 'sqlite'
+  // driver: "turso",
   dbCredentials: {
     // url: "file:school.db",
-    url : process.env.DB_URL!,
-    authToken: process.env.DB_TOKEN,
+    // url : process.env.DB_URL!,
+    url : process.env.DATABASE_URL!
+    // authToken: process.env.DB_TOKEN,
   },
 });

@@ -4,21 +4,12 @@ import { Save } from 'lucide-react';
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import toast from 'react-hot-toast';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Button } from './ui/button'
 import { StudentSchema, TStudent } from "@/validation/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addStudent } from "@/actions/actions";
+import { addStudent } from "@/server/actions/actions";
 import Dropdown from "./Dropdown";
 import { TBarangay, TCity, TProvince } from "@/app/student/add/page";
-import { useState } from "react";
 
 export default function StudentForm({provinces, city, barangay} : {provinces : TProvince[], city : TCity[], barangay : TBarangay[]}) {
 
@@ -43,8 +34,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
     toast.success('Save Successfully')
     reset()
   }
-  // if edit student get defaul value and form default value
-  {/* 1043 104324 */}
+
   const proviceCode = watch('address.province', '')
   const cityCode = watch('address.city', '')
 
@@ -58,6 +48,10 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           <p className='font-bold'>Student Infomation</p>
         </div>
         <div className='flex gap-4 mt-2'> {/* student name 1st section*/}
+          <div className='flex-1'>
+            <Label className={`text-xs ${errors.lrn && 'text-red-500'}`}>LRN</Label>
+            <Input {...register("lrn", { required: true })} placeholder='Last Name'/>
+          </div>
           <div className='flex-1'>
             <Label className={`text-xs ${errors.last_name && 'text-red-500'}`}>Last Name</Label>
             <Input {...register("last_name", { required: true })} placeholder='Last Name'/>
@@ -181,9 +175,6 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
               )}
             />
 
-
-              {/* <Label className="text-xs">Province</Label>
-              <Input  {...register("address.province")} placeholder="Province"/> */}
             </div>
             <div className="flex-1">
               <Controller
@@ -201,9 +192,6 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
                   </>
                 )}
               />
-
-              {/* <Label className="text-xs">Municipality/City</Label>
-              <Input {...register("address.city")} placeholder="Municipality/City"/> */}
             </div>
           </div>
           <div className="flex gap-4">
@@ -248,7 +236,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
       <div className="flex justify-center">
 
         <Button type='submit' disabled={isSubmitting}>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1"> 
             <Save />
               {isSubmitting ?  <p>Loading...</p> : <p>Save</p>}
           </div>
