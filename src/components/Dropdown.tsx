@@ -2,18 +2,19 @@ import React from 'react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 
 
-export default function Dropdown<T >({onChange, value, items, getLabel, getValue, label } : { 
+export default function Dropdown<T >({onChange, value, items, getLabel, getValue, label, disabled } : { 
     onChange? : (...even : any[]) => void,
     value? : string ,
     items : T[],
     getLabel? : (props : T) => string  
     getValue? : (props : T) => string 
-    label : string
+    label : string,
+    disabled? : boolean
   }){
 
   return (
     
-    <Select onValueChange={onChange} value={value}>
+    <Select disabled={disabled} onValueChange={onChange} value={value}>
       <SelectTrigger>
         <SelectValue placeholder={label} />
       </SelectTrigger>

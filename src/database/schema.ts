@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigserial, date, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigserial, boolean, date, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const students = pgTable('students', {
   student_id: serial('id').primaryKey(),
@@ -38,6 +38,7 @@ export const enrolled_students = pgTable('enrolled_students', {
   grade_level_id : integer('grade_level_id').notNull(),
   school_id : integer('school_id'),
   section_id : integer('section_id'),
+  is_id_paid : boolean('is_id_paid'),
   school_year : varchar('school_year')
 })
 

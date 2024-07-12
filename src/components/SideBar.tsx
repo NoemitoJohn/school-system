@@ -8,6 +8,7 @@ export default function SideBar() {
         <SubMenu label="Student" defaultOpen >
           <MenuItem component={<Link href='/student/add' />}> Add Student </MenuItem>
           <MenuItem component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
+          <MenuItem component={<Link href='/student/endrolled' />} > Endrolled Student</MenuItem>
           <MenuItem component={<Link href='/student/print-id' />} > Print ID</MenuItem>
         </SubMenu>
       </Menu>

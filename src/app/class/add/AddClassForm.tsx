@@ -59,10 +59,10 @@ export default function AddClassForm({classes} : {classes : TClassName[]}) {
               <Label className='text-xs'>School Year</Label>
               <Input {...register('school_year')} placeholder='2024-2025' />
             </div>
-            <div className='flex-1'>
+            {/* <div className='flex-1'>
               <Label className='text-xs'>Created by:</Label>
               <Input {...register('created_by')} placeholder='Name'/>
-            </div>
+            </div> */}
           </div>
           <Button type='submit' disabled={isSubmitting}>Add Class</Button>
         </div>

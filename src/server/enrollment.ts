@@ -1,49 +1,12 @@
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
-import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from "@/validation/schema"
-import { and, asc, eq, ne, sql } from "drizzle-orm"
+import { getSchoolYear } from "@/lib/utils"
+import { asc, eq, ne, sql } from "drizzle-orm"
 
-export async function POST(request: Request) {
-  const body : TStudentEnrollmentSchema = await request.json()
+export const getEnrolledStudent = async () => {
+  const school_year = getSchoolYear()
 
-  const validation =  StudentEnrollmentSchema.safeParse(body)
-
-  if(validation.error) {
-    return Response.error()
-  }
-
-  const {data} = validation
-  
-  const studentId = await db.transaction(async (tx) => {
-    try {
-      const [insert] = await tx.insert(enrolled_students).values({
-        grade_level_id : +data.grade_level,
-        section_id : +data.section,
-        student_id : +data.id,
-        school_year : data.school_year
-      }).returning()
-        
-      const enrolmentId  = insert.enrolled_student_id
-        
-      await tx.update(students).set({
-        enrollment_id : enrolmentId
-      }).where(eq(students.student_id, +data.id))
-
-      return insert.student_id
-      
-    } catch (error) {
-      tx.rollback()
-    }
-  })
-
-  if(studentId) {
-    return Response.json({student_id : studentId})
-  }
-  return Response.error()
-}
-
-export async function GET() {
   try {
     const getStudents = db.select(
     {
@@ -53,9 +16,11 @@ export async function GET() {
       last_name : sql<string>`${students.last_name}`.as('last_name'),
       middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
       enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
+      enrolled_id :  enrolled_students.enrolled_student_id,
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
       enrolled_year : sql<string>`COALESCE(${enrolled_students.school_year}, '')`.as('enrolled_year'),
+      is_id_paid : enrolled_students.is_id_paid
     })
     .from(students)
     .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
@@ -72,14 +37,13 @@ export async function GET() {
       full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
       grade_level : s.grade_level_name,
       section : s.section_name,
+      enrolled_id : s.enrolled_id,
+      is_paid_id : s.is_id_paid,
       year_enrolled : s.enrolled_year
     }))
-    return Response.json(formatStudent)
+    return formatStudent
 
   } catch (error) {
     console.log(error)
-    return Response.error()
   }
 }
-
-
