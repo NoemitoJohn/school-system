@@ -1,0 +1,1 @@
+ALTER TABLE "enrolled_students" ADD COLUMN "is_id_paid" boolean;

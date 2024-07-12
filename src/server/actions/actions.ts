@@ -61,7 +61,7 @@ export const addClass  = async (data : TClassSchema) => {
           grade_level_id : gradeLevelId,
           school_year : data.school_year,
           section_name : data.section_name,
-          created_by : data.created_by,
+          // created_by : data.created_by,
         })
       } catch (error) {
         console.log(error)

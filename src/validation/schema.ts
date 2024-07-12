@@ -66,7 +66,7 @@ export const ClassSchema = z.object( {
   ]),
   section_name : z.string().min(3).trim(),
   school_year : z.string().includes('-').trim(),
-  created_by : z.string().trim().min(3)
+  // created_by : z.string().trim().min(3)
 })
 
 

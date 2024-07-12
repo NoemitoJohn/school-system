@@ -4,3 +4,10 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export const getSchoolYear = () => {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const school_year = `${currentYear}-${currentYear + 1}`
+  return school_year
+}

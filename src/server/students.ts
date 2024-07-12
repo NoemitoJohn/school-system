@@ -2,29 +2,66 @@
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
+import { getSchoolYear } from "@/lib/utils"
 import { TStudentEnrollmentSchema } from "@/validation/schema"
-import { and, asc, desc, eq, ilike, like, max, or, sql, } from "drizzle-orm"
+import { and, asc, desc, eq, gt, gte, ilike, isNull, like, lte, max, ne, or, sql, } from "drizzle-orm"
+import { alias } from "drizzle-orm/pg-core"
 import { revalidatePath } from "next/cache"
 
 
 export async function getStudentEnrollment() {
+
+  // const school_year = getSchoolYear()
+
   try {
-    const getStudents = await db.select(
+    const es = alias(enrolled_students, 'es')
+    
+    const getMaxSchoolYear = db.select({ // get the max school year
+      student_id : enrolled_students.student_id,
+      school_year : sql`MAX(${enrolled_students.school_year})`.as('max_school_year')
+    }).from(enrolled_students)
+    .groupBy(enrolled_students.student_id).as('max_year')
+
+    const getLatestEnrollment = db.select( // self join
     {
-      id : sql<number>`${students.student_id}`,
-      lrn : sql<string>`${students.lrn}`,
-      first_name : sql<string>`${students.first_name}`,
-      last_name : sql<string>`${students.last_name}`,
-      middle_name : sql<string>`${students.middle_name}`,
-      enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
+      student_id: es.student_id,
+      grade_level_id : es.grade_level_id,
+      section_id : es.section_id,
+      year : sql<number>`CAST(NULLIF(SPLIT_PART(${getMaxSchoolYear.school_year}, '-', 1), '') as INTEGER)`.as('year'),
+      school_year : getMaxSchoolYear.school_year
+    }
+    ).from(es).innerJoin(getMaxSchoolYear,
+    and(
+      eq(es.student_id, getMaxSchoolYear.student_id),
+      eq(getMaxSchoolYear.school_year, es.school_year)
+    )).as('latest_enrollment')
+
+    
+    const getStudents = await db.select( // left join with student
+    {
+      id : sql<number>`${students.student_id}`.as('id'),
+      lrn : sql<string>`${students.lrn}`.as('lrn'),
+      first_name : sql<string>`${students.first_name}`.as('first_name'),
+      last_name : sql<string>`${students.last_name}`.as('last_name'),
+      middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
+      // enrollment_id : sql<string>`COALESCE(${getLatestEnrollment.enrolled_student_id}, -1)`.as('enrollment_id'),
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
-      enrolled_year : sql<string>`COALESCE(${enrolled_students.school_year}, '')`.as('enrolled_year'),
+      year : getLatestEnrollment.year,
+      enrolled_year : sql<string>`COALESCE(${getLatestEnrollment.school_year}, '')`.as('enrolled_year'),
     })
     .from(students)
-    .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
-    .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
-    .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id)).orderBy(asc(sections.school_year))
+    .leftJoin(getLatestEnrollment, eq(students.student_id, getLatestEnrollment.student_id))
+    .leftJoin(grade_levels, eq(getLatestEnrollment.grade_level_id, grade_levels.grade_level_id))
+    .leftJoin(sections, eq(sections.section_id, getLatestEnrollment.section_id))
+    .where(
+      or(
+        ne(getLatestEnrollment.year, new Date().getFullYear()),
+        isNull(getLatestEnrollment.year)
+      )
+    )
+    
+    console.log(getStudents)
 
     const formatStudent : TEnromentStudent[] = getStudents.map(s => ({
       id : s.id,
@@ -34,6 +71,7 @@ export async function getStudentEnrollment() {
       section : s.section_name,
       year_enrolled : s.enrolled_year
     }))
+
     return formatStudent
 
   } catch (error) {
@@ -42,13 +80,16 @@ export async function getStudentEnrollment() {
 }
 
 export async function searchStudentEnrollment(search : string) {
+
+  const school_year = getSchoolYear()
+
   try {
-    const searchStudent =  await db.select({
-      id : sql<number>`${students.student_id}`,
-      lrn : sql<string>`${students.lrn}`,
-      first_name : sql<string>`${students.first_name}`,
-      last_name : sql<string>`${students.last_name}`,
-      middle_name : sql<string>`${students.middle_name}`,
+    const getStudents =  db.select({ // subquery
+      id : sql<number>`${students.student_id}`.as('id'),
+      lrn : sql<string>`${students.lrn}`.as('lrn'),
+      first_name : students.first_name,
+      last_name : students.last_name,
+      middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
       enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
@@ -57,10 +98,19 @@ export async function searchStudentEnrollment(search : string) {
     .from(students)
     .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
     .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
-    .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id)).orderBy(asc(sections.school_year))
-    .where(or(ilike(students.last_name, `%${search}%`), ilike(students.first_name, `%${search}%`)))
+    .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id))
+    .orderBy(asc(sections.school_year))
+    .as('sq')
 
-    console.log(searchStudent)
+    const searchStudent = await db.select().from(getStudents).where( // main query
+      and(
+        or(
+          ilike(getStudents.last_name, `%${search}%`),
+          ilike(getStudents.first_name, `%${search}%`) 
+        ),
+        ne(getStudents.enrolled_year, school_year )
+      )
+    )
 
     const formatSearchStudent : TEnromentStudent[] = searchStudent.map(s => ({
       id : s.id,
@@ -73,23 +123,9 @@ export async function searchStudentEnrollment(search : string) {
 
     return formatSearchStudent
   } catch (error) {
-    // throw new Error('Something went wrong')
-    console.log(error)
+
   }
   
-}
-
-export async function getStudentInfo(id : string) {
-  try {
-    const student = await db.select({
-      id : students.student_id,
-      first_name : students.first_name,
-      last_name : students.last_name,
-      middle_name : students.middle_name
-    }).from(students).where(eq(students.student_id, Number(id)))
-    return student
-  } catch (error) {
-  }
 }
 
 export async function insertEnrollment(data : TStudentEnrollmentSchema) {

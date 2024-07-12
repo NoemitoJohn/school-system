@@ -8,11 +8,12 @@ import DataTable from '@/components/DataTable';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { searchStudentEnrollment } from '@/server/students';
 import { useEffect, useReducer, useState } from 'react';
-
+import useSWR, { Fetcher } from 'swr'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from '@/validation/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Dropdown from '@/components/Dropdown';
+import toast from 'react-hot-toast';
 
 export type TEnromentStudent = {
   id: number
@@ -21,6 +22,8 @@ export type TEnromentStudent = {
   grade_level : string 
   section : string 
   year_enrolled : string 
+  is_paid_id? : boolean | null
+  enrolled_id? : number | null
 }
 
 type TSearch = { 
@@ -41,11 +44,11 @@ export type TSection = {
 
 
 type TStudentEnrollmentAction = {
-  action : 'INIT' | 'UPDATE' | 'ADD'
+  action : 'INIT' | 'UPDATE' | 'ADD' | 'DELETE'
   students? : TEnromentStudent[]
   student? : TEnromentStudent
+  id? : number
 }
-
 
 function studentReducer(state : TEnromentStudent[], action : TStudentEnrollmentAction) {
   switch(action.action) {
@@ -69,6 +72,10 @@ function studentReducer(state : TEnromentStudent[], action : TStudentEnrollmentA
           action.student,
           ...filter
         ]
+      }
+    case 'DELETE':
+      if(action.id){
+        return state.filter(s => !(s.id == action.id))
       }
     default:
       return state;
@@ -131,10 +138,11 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
 
   const handleSearchSubmit : SubmitHandler<TSearch> = async ({search}) => {
     try {
+      console.log(140, search)
       const studentSearch = await searchStudentEnrollment(search)
     
       dispatchStudentEnrollment({action : 'INIT', students : studentSearch})
-      reset()
+      // reset()
     } catch (error) {
       // toast  
       alert(error)
@@ -147,10 +155,17 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         method : 'POST',
         body : JSON.stringify(formData)
       })
-      const response : TStudentEnrollmentAction = await request.json()
-      console.log(139, response)
+
+      if(!request.ok){
+        return toast.error('Something went wrong!')
+      }
       
-      dispatchStudentEnrollment(response)
+      const response : {student_id : number} = await request.json()
+      
+      dispatchStudentEnrollment({action : 'DELETE', id : response.student_id})
+
+      toast.success('Save Successfully')
+
 
     } catch (error) {
       
@@ -162,7 +177,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       <form onSubmit={handleSubmit(handleSearchSubmit)}>
         <Label className='text-xs' >Search Name</Label>
         <div className='flex gap-2'>
-          <Input  {...register("search", { required: true })} placeholder='Student Name'/>
+          <Input  {...register("search", {required : false})} placeholder='Student Name'/>
           <Button disabled={isSubmitting} type='submit'>
             <div className='flex gap-1'>
               <Search size={16}/>
@@ -182,38 +197,46 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
 }
 
 
-
 // MODAL COMPONENT
 const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel } : {isOpen : boolean, id : number, sections : TSection[], gradeLevel : TGradeLevel[], handleOpenChange : (open : boolean) => void
   enrollSubmit : SubmitHandler<TStudentEnrollmentSchema>
 }) => {
 
-  const [errorLoad, setErrorLoad] = useState(false)
-  
+  const fetcher : Fetcher<TStudentEnrollmentSchema, string> = async (args : string) => {
+    const request = await fetch(args)
+
+    if(!request.ok){
+      const error = new Error('An error occurred while fetching the data.')
+      throw error
+    }
+
+    const respose : TStudentEnrollmentSchema = await request.json()
+    return respose
+  }
+
+  const {data : student, error, isLoading} = useSWR<TStudentEnrollmentSchema, Error>(`/api/student/${id}`, fetcher )
   const [sectionsState, setSectionsState] = useState(sections)
   const [gradeLevelState, setGradelevelState] = useState(gradeLevel)
   const [schoolYear, setSchoolYear] = useState(sections)
-
 
   const {
     register,
     handleSubmit,
     control,
     watch,
-    getValues,
-    formState : {errors, isSubmitting, isLoading}
+    setValue,
+    formState : {errors, isSubmitting}
   } = useForm<TStudentEnrollmentSchema>({
-    resolver : zodResolver(StudentEnrollmentSchema),
-    defaultValues : async () => { 
-      const req = await fetch(`/api/student/${id}`)
-      if(!req.ok){
-        setErrorLoad(true)
-        return {}
-      }
-      const defValue = await req.json()
-      return defValue
-    }
+    resolver : zodResolver(StudentEnrollmentSchema)
   })
+
+  useEffect(() => {
+    if(student){
+      setValue('id', student.id)
+      setValue('full_name', student.full_name)
+    }
+  }, [student])
+
 
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
@@ -238,76 +261,109 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
     })
     return () => subscription.unsubscribe()
   }, [watch])
-
-  
-
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent>
+        <DialogContent className='max-w-[60%]'>
           <DialogHeader>
             <DialogTitle>Enrolment Form</DialogTitle>
           </DialogHeader>
           {isLoading ? 
           ( <div className='text-center'>...Loading</div>) :  ( 
           <div>
-          {errorLoad ? (<div className='text-center text-red-500'>Something went Wrong</div>) : (
-            <form onSubmit={handleSubmit(enrollSubmit)}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-2">
-                  <Label className='text-right'>Student Name</Label>
-                  <Input {...register('full_name')} placeholder='test' className="col-span-3" disabled/>
-                  <Controller
-                    name='grade_level'
-                    control={control}
-                    render={({field, formState}) => (
-                      <>
+          {error ? (<div className='text-center text-red-500'>Something went Wrong</div>) : (
+            <div className='flex justify-evenly gap-6'>
+                <div>
+                  <div className="grid gap-4 py-4">
+                    <div className='text-center font-sans'>Current Grade Level</div>
+                    {!student?.school_year && (
+                      <div className='text-center italic'>No Records</div>
+                    ) }
+                    {student?.school_year && (
+                      <div className="grid grid-cols-4 items-center gap-2">
                         <Label className='text-right'>Grade Level</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select Grade Level' items={gradeLevelState} onChange={field.onChange} value={field.value}
+                          <Dropdown disabled label='Select Grade Level' items={gradeLevel} value={student?.grade_level}
                             getValue={(p) => p.id}
                             getLabel={(p) => p.level_name}
                           />
                         </div>
-                      </>
-                    )}
-                  />
-                  <Controller
-                    name='section'
-                    control={control}
-                    render={({field, formState}) => (
-                      <>
                         <Label className='text-right'>Section</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select Section' items={sectionsState} onChange={field.onChange} value={field.value}
+                          <Dropdown disabled label='Select Section' items={sections}  value={student?.section}
                             getValue={(p) => p.id}
                             getLabel={(p) => p.section_name}
                           />
                         </div>
-                      </>
-                    )}
-                  />
-                  <Controller
-                    name='school_year'
-                    control={control}
-                    render={({field, formState}) => (
-                      <>
-                        <Label className='text-right'>Section</Label>
+                        <Label className='text-right'>School Year</Label>
                         <div className="col-span-3"> 
-                          <Dropdown label='Select School Year' items={schoolYear} onChange={field.onChange} value={field.value}
-                            getValue={(p) => p.school_year}
-                            getLabel={(p) => p.school_year}
-                          />
+                          <Input disabled value={student?.school_year} />
                         </div>
-                      </>
+                      </div>
+
                     )}
-                  />
+                  </div>
+
                 </div>
-              </div>
-              <div className='flex justify-end'>
-                <Button type='submit' disabled={isSubmitting}>Enroll</Button>
-              </div>
-            </form>
+                <div>
+                  <form onSubmit={handleSubmit(enrollSubmit)}>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-2">
+                        <Label className='text-right'>Student Name</Label>
+                        <Input {...register('full_name')} placeholder='test' className="col-span-3" disabled/>
+                        <Controller
+                          name='grade_level'
+                          control={control}
+                          render={({field, formState}) => (
+                            <>
+                              <Label className='text-right'>Grade Level</Label>
+                              <div className="col-span-3"> 
+                                <Dropdown label='Select Grade Level' items={gradeLevelState} onChange={field.onChange} value={field.value}
+                                  getValue={(p) => p.id}
+                                  getLabel={(p) => p.level_name}
+                                />
+                              </div>
+                            </>
+                          )}
+                        />
+                        <Controller
+                          name='section'
+                          control={control}
+                          render={({field, formState}) => (
+                            <>
+                              <Label className='text-right'>Section</Label>
+                              <div className="col-span-3"> 
+                                <Dropdown label='Select Section' items={sectionsState} onChange={field.onChange} value={field.value}
+                                  getValue={(p) => p.id}
+                                  getLabel={(p) => p.section_name}
+                                />
+                              </div>
+                            </>
+                          )}
+                        />
+                        <Controller
+                          name='school_year'
+                          control={control}
+                          render={({field, formState}) => (
+                            <>
+                              <Label className='text-right'>School Year</Label>
+                              <div className="col-span-3"> 
+                                <Dropdown label='Select School Year' items={schoolYear} onChange={field.onChange} value={field.value}
+                                  getValue={(p) => p.school_year}
+                                  getLabel={(p) => p.school_year}
+                                />
+                              </div>
+                            </>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div className='flex justify-end'>
+                      <Button type='submit' disabled={isSubmitting}>Submit</Button>
+                    </div>
+                  </form>
+                </div>
+              
+            </div>
           )}
           </div>
           )}
