@@ -14,6 +14,7 @@ import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from '@/validation/
 import { zodResolver } from '@hookform/resolvers/zod';
 import Dropdown from '@/components/Dropdown';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export type TEnromentStudent = {
   id: number
@@ -87,7 +88,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const [state, dispatchStudentEnrollment] = useReducer(studentReducer, rows)
   const [studentId, setStudentId] = useState<number>(0)
   const [open, setOpen] = useState(false)
-
+  const router = useRouter()
   const handleEnrollButtonClick = async (id : number) => {
     setStudentId(id)
     setOpen(true)
@@ -165,7 +166,8 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       dispatchStudentEnrollment({action : 'DELETE', id : response.student_id})
 
       toast.success('Save Successfully')
-
+      
+      router.refresh()
 
     } catch (error) {
       

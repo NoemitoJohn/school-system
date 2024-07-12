@@ -61,7 +61,6 @@ export async function getStudentEnrollment() {
       )
     )
     
-    console.log(getStudents)
 
     const formatStudent : TEnromentStudent[] = getStudents.map(s => ({
       id : s.id,
