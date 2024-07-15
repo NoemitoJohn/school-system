@@ -4,7 +4,7 @@ import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
 import { getSchoolYear } from "@/lib/utils"
 import { TStudentEnrollmentSchema } from "@/validation/schema"
-import { and, asc, desc, eq, gt, gte, ilike, isNull, like, lte, max, ne, or, sql, } from "drizzle-orm"
+import { and, asc, desc, eq, gt, gte, ilike, isNull, like, lt, lte, max, ne, or, sql, } from "drizzle-orm"
 import { alias } from "drizzle-orm/pg-core"
 import { revalidatePath } from "next/cache"
 
@@ -56,12 +56,11 @@ export async function getStudentEnrollment() {
     .leftJoin(sections, eq(sections.section_id, getLatestEnrollment.section_id))
     .where(
       or(
-        ne(getLatestEnrollment.year, new Date().getFullYear()),
+        lt(getLatestEnrollment.year, new Date().getFullYear()),
         isNull(getLatestEnrollment.year)
       )
     )
     
-    console.log(getStudents)
 
     const formatStudent : TEnromentStudent[] = getStudents.map(s => ({
       id : s.id,

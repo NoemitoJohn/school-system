@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ColumnDef } from "@tanstack/react-table"
+import { useRouter } from "next/navigation"
 import { useReducer, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import toast from "react-hot-toast"
@@ -36,7 +37,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   const [enrolledStudents, dispatchEnrolledStudents] = useReducer(reducer, rows)
   const [student, setStudent] = useState<TEnromentStudent>()
   const [isOpen, setIsOpen] = useState(true)
- 
+  const router = useRouter()
   const colums : ColumnDef<TEnromentStudent>[] = [
     {
       accessorKey : 'lrn',
@@ -89,9 +90,9 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     }
     
     const respose : {student_enrolled_id : number}  = await request.json()
-    
     dispatchEnrolledStudents({action : 'UPDATE', enrolled_student_id : respose.student_enrolled_id })
     toast.success('Save Successfully')
+    router.refresh()
   }
 
   const renderModal = () => {

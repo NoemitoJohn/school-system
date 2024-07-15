@@ -2,8 +2,6 @@ import Enrollment, { TEnromentStudent, TSection } from '@/components/EnrollmentS
 import { getGradeLevels } from '@/server/gradeLevel'
 import { getSections } from '@/server/sections'
 import { getStudentEnrollment} from '@/server/students'
-// import { Dialog, DialogTitle } from '@components/ui/dialog'
-// export const dynamic = 'force-dynamic'
 
 export const revalidate = 0
 
