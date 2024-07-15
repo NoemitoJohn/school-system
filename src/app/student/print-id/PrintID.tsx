@@ -59,7 +59,7 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
           break;
         }
       }
-      doc.text(rows[0].parent_number, 46 + w * x, height - 25)
+      doc.text(student.parent_number, 46 + w * x, height - 25)
     }
     doc.output('dataurlnewwindow')
   }
