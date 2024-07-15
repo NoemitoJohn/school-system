@@ -87,14 +87,6 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
       accessorKey : 'year_enrolled',
       header: 'School Year'
     },
-    {
-      id : "Action",
-      header : "Print",
-      cell : ({row}) => {
-        const original = row.original
-        return original.id
-      }
-    }
   ]
   return(
     <>

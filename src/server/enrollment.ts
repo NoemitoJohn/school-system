@@ -86,8 +86,6 @@ export const getEnrolledStudentWithPaidId = async () => {
     
     }))
 
-    console.log(formatStudent)
-
     return formatStudent
 
   } catch (error) {
