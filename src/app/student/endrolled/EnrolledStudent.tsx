@@ -1,11 +1,13 @@
 'use client'
 import DataTable from "@/components/DataTable"
+import DataTableCustomHook from "@/components/DataTableCustomHook"
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ColumnDef } from "@tanstack/react-table"
+import useDataTable from "@/hooks/useDataTable"
+import { ColumnDef, getCoreRowModel } from "@tanstack/react-table"
 import { useRouter } from "next/navigation"
 import { useReducer, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -28,12 +30,9 @@ const reducer = (state : TEnromentStudent[], action : TReducerActions) => {
     default : 
       return state
   }
-  
-
 }
 
 export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
-  // const [enrolledStudents, setEnrolledStudents] = useState<TEnromentStudent[]>()
   const [enrolledStudents, dispatchEnrolledStudents] = useReducer(reducer, rows)
   const [student, setStudent] = useState<TEnromentStudent>()
   const [isOpen, setIsOpen] = useState(true)
@@ -73,6 +72,13 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
       }
     }
   ]
+  
+  const studentTable = useDataTable({
+    data : rows,
+    columns : colums,
+    getCoreRowModel : getCoreRowModel(),
+    enableMultiRowSelection: false,
+  })
 
   const handleOnPayIdClicked = async ( std :TEnromentStudent) => {
     setStudent(std)
@@ -80,7 +86,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   }
 
   const handleSubmit : SubmitHandler<{enrolled_id : number}> = async (data) => {
-    const request = await fetch('/api/payment-id', {
+    const request = await fetch('/api/student-id', {
       method : 'POST',
       body : JSON.stringify(data)
     })
@@ -105,7 +111,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
 
   return (
     <div>
-      <DataTable columns={colums} data={enrolledStudents} />
+      <DataTableCustomHook table={studentTable} />
       {renderModal()}
     </div>
   )
@@ -122,7 +128,6 @@ const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit}
       enrolled_id : student.enrolled_id!
     }
   })
-  // console.log(errors)
   return(
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
