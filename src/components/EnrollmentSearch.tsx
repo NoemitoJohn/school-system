@@ -3,7 +3,7 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Button } from './ui/button'
 import {  Search } from 'lucide-react';
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, getCoreRowModel } from "@tanstack/react-table"
 import DataTable from '@/components/DataTable';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { searchStudentEnrollment } from '@/server/students';
@@ -15,6 +15,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Dropdown from '@/components/Dropdown';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import useDataTable from '@/hooks/useDataTable';
+import DataTableCustomHook from './DataTableCustomHook';
 
 export type TEnromentStudent = {
   id: number
@@ -89,6 +91,9 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const [studentId, setStudentId] = useState<number>(0)
   const [open, setOpen] = useState(false)
   const router = useRouter()
+
+ 
+
   const handleEnrollButtonClick = async (id : number) => {
     setStudentId(id)
     setOpen(true)
@@ -129,6 +134,13 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       }
     }
   ]
+
+
+  const studentTable = useDataTable({
+    data : rows,
+    columns : columns,
+    getCoreRowModel : getCoreRowModel()
+  })
 
   const {
     register,
@@ -189,8 +201,8 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         </div>
       </form>
       <div className='mt-4'>
-        <DataTable columns={columns} data={state}/>
-
+        {/* <DataTable columns={columns} data={state}/> */}
+        <DataTableCustomHook table={studentTable} />
       </div>
       {open && 
       (<Modal isOpen={open} id={studentId} sections={sections} gradeLevel={gradeLevel} handleOpenChange={setOpen} enrollSubmit={handleEnrollSubmit}/>)}

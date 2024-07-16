@@ -12,6 +12,7 @@ export type TStudentID = {
   year_enrolled : string 
   is_paid_id : boolean
   parent_number : string
+  enrolled_id : number
 }
 
 

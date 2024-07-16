@@ -2,7 +2,6 @@ import { TStudentID } from "@/app/student/print-id/page"
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
-import { getSchoolYear } from "@/lib/utils"
 import { and, asc, eq, ne, sql } from "drizzle-orm"
 
 export const getEnrolledStudent = async () => {
@@ -57,8 +56,8 @@ export const getEnrolledStudentWithPaidId = async () => {
       first_name : sql<string>`${students.first_name}`.as('first_name'),
       last_name : sql<string>`${students.last_name}`.as('last_name'),
       middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
-      enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
-      enrolled_id :  enrolled_students.enrolled_student_id,
+      // enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
+      enrolled_id :  sql<number>`enrolled_students.enrolled_student_id`.as('enrolled_id'),
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
       enrolled_year : sql<string>`COALESCE(${enrolled_students.school_year}, '')`.as('enrolled_year'),
@@ -72,9 +71,9 @@ export const getEnrolledStudentWithPaidId = async () => {
     .orderBy(asc(sections.school_year))
     .as('sq')
 
-    const getNotEnrolledStudent = await db.select().from(getStudents).where(and(ne(getStudents.enrolled_year, ''), eq(getStudents.is_id_paid, true)))
+    const getEnrolledStudent = await db.select().from(getStudents).where(and(ne(getStudents.enrolled_year, ''), eq(getStudents.is_id_paid, true)))
 
-    const formatStudent : TStudentID[] = getNotEnrolledStudent.map(s => ({
+    const formatStudent : TStudentID[] = getEnrolledStudent.map(s => ({
       id : s.id,
       lrn : s.lrn,
       full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
@@ -83,7 +82,7 @@ export const getEnrolledStudentWithPaidId = async () => {
       section : s.section_name,
       is_paid_id : s.is_id_paid,
       year_enrolled : s.enrolled_year,
-    
+      enrolled_id : s.enrolled_id
     }))
 
     return formatStudent

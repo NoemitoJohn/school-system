@@ -1,30 +1,12 @@
-'use client'
-import { ColumnDef, flexRender, getCoreRowModel, OnChangeFn, RowSelection, RowSelectionState, useReactTable } from '@tanstack/react-table'
 import React from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Table as TB, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { flexRender, Table } from '@tanstack/react-table'
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  selectionChange? : OnChangeFn<RowSelectionState>
-  selectionState? : Record<string, boolean>
-}
 
-export default function DataTable<TData, TValue>({ data, columns, selectionChange, selectionState = {} } : DataTableProps<TData, TValue>) {
-  
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel : getCoreRowModel(),
-    onRowSelectionChange: selectionChange,
-    state : {
-      rowSelection : selectionState
-    }
-  })
-
+export default function DataTableCustomHook<T>({table, handleRowClick} : {table : Table<T> , handleRowClick? : (original : T) => void}) {
   return (
     <div className='rounded-md border'>
-      <Table>
+      <TB>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -49,6 +31,7 @@ export default function DataTable<TData, TValue>({ data, columns, selectionChang
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={row.getToggleSelectedHandler()}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
@@ -59,13 +42,13 @@ export default function DataTable<TData, TValue>({ data, columns, selectionChang
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
           )}
         </TableBody>
-      </Table>
+      </TB>
     </div>
   )
 }
