@@ -137,7 +137,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
 
 
   const studentTable = useDataTable({
-    data : rows,
+    data : state,
     columns : columns,
     getCoreRowModel : getCoreRowModel()
   })
@@ -145,14 +145,13 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const {
     register,
     handleSubmit,
-    reset,
     formState : {errors, isSubmitting}
   } = useForm<TSearch>()
 
   const handleSearchSubmit : SubmitHandler<TSearch> = async ({search}) => {
     try {
-      console.log(140, search)
       const studentSearch = await searchStudentEnrollment(search)
+      console.log(140, studentSearch)
     
       dispatchStudentEnrollment({action : 'INIT', students : studentSearch})
       // reset()
@@ -178,8 +177,8 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       dispatchStudentEnrollment({action : 'DELETE', id : response.student_id})
 
       toast.success('Save Successfully')
-      
       router.refresh()
+      setOpen(false)
 
     } catch (error) {
       
@@ -201,7 +200,6 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         </div>
       </form>
       <div className='mt-4'>
-        {/* <DataTable columns={columns} data={state}/> */}
         <DataTableCustomHook table={studentTable} />
       </div>
       {open && 
@@ -316,7 +314,6 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
 
                     )}
                   </div>
-
                 </div>
                 <div>
                   <form onSubmit={handleSubmit(enrollSubmit)}>
@@ -372,7 +369,13 @@ const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel
                       </div>
                     </div>
                     <div className='flex justify-end'>
-                      <Button type='submit' disabled={isSubmitting}>Submit</Button>
+                      <Button type='submit' disabled={isSubmitting}>
+                        {isSubmitting ? 
+                          ( <span>Loading..</span> )
+                        : 
+                          ( <span>Submit</span> )
+                        }
+                        </Button>
                     </div>
                   </form>
                 </div>

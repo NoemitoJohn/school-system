@@ -29,7 +29,8 @@ export const students = pgTable('students', {
   school_id : integer('school_id'),
   section_id : integer('section_id'),
   street_address : varchar('street_address'),
-  enrollment_id : integer('enrollment_id')
+  enrollment_id : integer('enrollment_id'),
+  img_url : text('img_url')
 })
 
 export const enrolled_students = pgTable('enrolled_students', {

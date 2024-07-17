@@ -38,7 +38,8 @@ export const StudentSchema = z.object({
   religion : z.string(),
   parent : ParentSchema,
   address : AddressSchema,
-  contact_num : z.string().min(10)
+  contact_num : z.string().min(10),
+  profile_pic : z.any().optional()
 })
 
 export const StudentEnrollmentSchema = z.object({
