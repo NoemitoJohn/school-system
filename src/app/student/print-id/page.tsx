@@ -13,6 +13,7 @@ export type TStudentID = {
   is_paid_id : boolean
   parent_number : string
   enrolled_id : number
+  img_url?: string
 }
 
 

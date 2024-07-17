@@ -119,10 +119,9 @@ export async function searchStudentEnrollment(search : string) {
       section : s.section_name,
       year_enrolled : s.enrolled_year
     })) 
-
     return formatSearchStudent
   } catch (error) {
-
+    console.log(error)
   }
   
 }

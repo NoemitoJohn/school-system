@@ -25,7 +25,11 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
   })
 
   const onSubmit : SubmitHandler<TStudent> = async (data) => {
-    const response = await addStudent(data)
+    // console.log(data.da)
+    const file =  data.profile_pic?.[0] as File
+    const formData = new FormData()
+    formData.append('fileImage', file)
+    const response = await addStudent({...data, profile_pic : formData})
     
     if(response?.error) {
       return toast.error(response.error)
@@ -37,7 +41,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
 
   const proviceCode = watch('address.province', '')
   const cityCode = watch('address.city', '')
-
+  console.log(errors)
   const cities = city.filter(c => c.province_code === proviceCode)
   const barangays = barangay.filter(b => b.city_code === cityCode)
   return (
@@ -46,6 +50,10 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
       <div>
         <div className="border-slate-400 border-b">
           <p className='font-bold'>Student Infomation</p>
+        </div>
+        <div className="inline-block mt-2">
+          <Label className="text-xs">Student Photo</Label>
+          <Input {...register("profile_pic")} type="file" />
         </div>
         <div className='flex gap-4 mt-2'> {/* student name 1st section*/}
           <div className='flex-1'>

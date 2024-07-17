@@ -9,6 +9,7 @@ import DataTableCustomHook from '@/components/DataTableCustomHook'
 import useDataTable from '@/hooks/useDataTable'
 import useSWRMutation from 'swr/mutation'
 import toast from 'react-hot-toast';
+import { supabase } from '@/database/supabase';
 
 type TIdTemple = {
   front : '/ELEM/ELEM-F.png' | '/JHS/JHS-F.png' | '/SHS/SHS-F.png'
@@ -87,7 +88,7 @@ const generateID = (students : TStudentID[]) => {
     orientation : 'landscape',
     unit: 'px',
   }).setFontSize(8);
-  
+  // console.log(students)
 
   const width = doc.internal.pageSize.getWidth()
   const height = doc.internal.pageSize.getHeight()
@@ -96,11 +97,19 @@ const generateID = (students : TStudentID[]) => {
   for (let x = 0; x < students.length; x++) {
     
     if(x > 5) break;
+
     const student = students[x]
+
+
     const frontIMG =  IdMapTemplate[student.grade_level].front
     const backIMG = IdMapTemplate[student.grade_level].back
     // front
-    doc.addImage(frontIMG, w * x, 0, w, h,)
+    doc.addImage(frontIMG, w * x, 0, w, h,) //front template
+    
+    if(student.img_url) doc.addImage(student.img_url, 35 + (w * x), 50.2, 56, 81.5) // profile pic
+    else  
+
+
     doc.text(student.lrn, 46 + w * x , 142)
     doc.text(student.full_name.toUpperCase(), 16 + w * x, 162).setFontSize(8)
     // back
@@ -117,7 +126,6 @@ const generateID = (students : TStudentID[]) => {
     doc.text(student.parent_number, 46 + w * x, height - 25)
   }
   
-  // doc.setLineDashPattern([10, 5], 20).line(0, h, width, h,'S')
   doc.output('dataurlnewwindow')
 }
 

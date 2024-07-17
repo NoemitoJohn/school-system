@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { useReducer, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import toast from "react-hot-toast"
+import useSWRMutation from "swr/mutation"
 
 
 type TReducerActions  = {
@@ -32,11 +33,22 @@ const reducer = (state : TEnromentStudent[], action : TReducerActions) => {
   }
 }
 
+const updateId  = async (url : string, { arg }: { arg: string }) =>  {
+  return fetch('/api/student-id', {
+    method : 'POST',
+    body : arg
+  })
+}
+
+
 export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   const [enrolledStudents, dispatchEnrolledStudents] = useReducer(reducer, rows)
+  const { trigger, isMutating } = useSWRMutation('/api/student-id', updateId)
   const [student, setStudent] = useState<TEnromentStudent>()
   const [isOpen, setIsOpen] = useState(true)
   const router = useRouter()
+
+
   const colums : ColumnDef<TEnromentStudent>[] = [
     {
       accessorKey : 'lrn',
@@ -86,25 +98,25 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   }
 
   const handleSubmit : SubmitHandler<{enrolled_id : number}> = async (data) => {
-    const request = await fetch('/api/student-id', {
-      method : 'POST',
-      body : JSON.stringify(data)
-    })
+    const request =  await trigger(JSON.stringify(data))
     
     if(!request.ok){ 
       return toast.error('Something Went Wrong!')
     }
-    
+
     const respose : {student_enrolled_id : number}  = await request.json()
+    
     dispatchEnrolledStudents({action : 'UPDATE', enrolled_student_id : respose.student_enrolled_id })
+    
     toast.success('Save Successfully')
     router.refresh()
+    setIsOpen(false)
   }
 
   const renderModal = () => {
     if(isOpen && student) {
       return (
-        <PaymentIDModal open={isOpen} student={student} handleOpenChange={setIsOpen} handleOnPaymentSubmit={handleSubmit} />
+        <PaymentIDModal open={isOpen} student={student} handleOpenChange={setIsOpen} handleOnPaymentSubmit={handleSubmit} isLoading={isMutating} />
       )
     }
   }
@@ -117,7 +129,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   )
 }
 
-const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit} : {open : boolean, student : TEnromentStudent,handleOpenChange : (open : boolean) => void, handleOnPaymentSubmit : SubmitHandler<{enrolled_id : number}> } ) => {
+const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit, isLoading} : {open : boolean, student : TEnromentStudent,handleOpenChange : (open : boolean) => void, handleOnPaymentSubmit : SubmitHandler<{enrolled_id : number}> , isLoading : boolean} ) => {
 
   const {
     register,
@@ -160,7 +172,13 @@ const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit}
           </div>
           <Input {...register('enrolled_id', {required : true})} type='hidden' disabled/>
           <div className=" flex justify-end">
-            <Button size='sm' type='submit' className="text-xs" >Mark As Paid</Button>
+            <Button size='sm' type='submit' className="text-xs" disabled={isLoading}>
+              {isLoading ? (
+                <span>Loading...</span>  
+              ) : (
+                <span>Mark As Paid</span>  
+              )}
+            </Button>
           </div>
         </div>
         </form>

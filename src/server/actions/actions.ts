@@ -1,13 +1,41 @@
 'use server'
 import { db } from "@/database/db"
 import { grade_levels, sections, students } from "@/database/schema"
-import { TClassSchema, TStudent } from "@/validation/schema"
+import { supabase } from "@/database/supabase"
+import { StudentSchema, TClassSchema, TStudent } from "@/validation/schema"
 import { eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import { nanoid } from 'nanoid'
+
+
+const upload = async (file : File) : Promise<string> =>{
+  const fileName = nanoid()
+  
+  if(typeof file == 'object') {
+
+    const {data : res , error} = await supabase.storage.from('profile').upload(`student/${fileName}.png`, file)
+
+    if(error) throw error;
+
+    return res?.path
+  }
+
+  return ''
+}
 
 export const addStudent =  async (data : TStudent) => {
   
+  const formData = data.profile_pic as FormData
+  
+  const {success, data : parse} = StudentSchema.safeParse(data)
+  
+  if(!success) return console.log('Invalid Form');
+  
+  const file = formData.get('fileImage') as File
+
   try {
+    const fileName =  await upload(file)
+    
     await db.insert(students).values({
       lrn : data.lrn,
       first_name : data.first_name,
@@ -26,6 +54,7 @@ export const addStudent =  async (data : TStudent) => {
       street_address : data.address.house_num,
       active: 1,
       parent_mobile_number : data.contact_num,
+      img_url : fileName,
     })
   } catch (error) {
     return {
