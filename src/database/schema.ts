@@ -30,7 +30,8 @@ export const students = pgTable('students', {
   section_id : integer('section_id'),
   street_address : varchar('street_address'),
   enrollment_id : integer('enrollment_id'),
-  img_url : text('img_url')
+  img_url : text('img_url'),
+  qrcode : text('qrcode')
 })
 
 export const enrolled_students = pgTable('enrolled_students', {

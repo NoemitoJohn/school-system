@@ -1,5 +1,6 @@
 import { getEnrolledStudent } from "@/server/enrollment"
 import EnrolledStudent from "./EnrolledStudent";
+import MarginContainer from "@/components/container/MarginContainer";
 
 export const revalidate = 0;
 // export const dynamic = 'force-dynamic'
@@ -15,10 +16,12 @@ export default async function EnrolledPage() {
 
   return (
     <div>
-      <div >Enrolled Student</div>
-      <div className="mt-4">
-        <EnrolledStudent rows={enrolledStudent} />
-      </div>
+      <MarginContainer>
+        <div className="uppercase font-semibold" >Enrolled Student</div>
+        <div className="mt-3">
+          <EnrolledStudent rows={enrolledStudent} />
+        </div>
+      </MarginContainer>
     </div>
   )
 }

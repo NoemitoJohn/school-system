@@ -3,6 +3,7 @@ import React from 'react'
 import provinceJSON from '@/address/province.json'
 import cityJSON from '@/address/city.json'
 import barangayJSON from '@/address/barangay.json'
+import MarginContainer from '@/components/container/MarginContainer'
 
 export type TProvince = { 
     province_code: string
@@ -36,7 +37,9 @@ export default async function StudentAdd() {
   
   return (
     <div>
+      <MarginContainer>
         <StudentForm provinces={provinces} city={city} barangay={barangay}/>
+      </MarginContainer>
     </div>
   )
 }

@@ -6,7 +6,7 @@ import { StudentSchema, TClassSchema, TStudent } from "@/validation/schema"
 import { eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { nanoid } from 'nanoid'
-
+import QRCode from 'qrcode';
 
 const upload = async (file : File) : Promise<string> =>{
   const fileName = nanoid()
@@ -36,6 +36,8 @@ export const addStudent =  async (data : TStudent) => {
   try {
     const fileName =  await upload(file)
     
+    const qr = await QRCode.toDataURL(data.lrn)
+    
     await db.insert(students).values({
       lrn : data.lrn,
       first_name : data.first_name,
@@ -55,6 +57,7 @@ export const addStudent =  async (data : TStudent) => {
       active: 1,
       parent_mobile_number : data.contact_num,
       img_url : fileName,
+      qrcode : qr
     })
   } catch (error) {
     return {
