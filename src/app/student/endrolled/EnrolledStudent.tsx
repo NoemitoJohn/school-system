@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import useDataTable from "@/hooks/useDataTable"
 import { ColumnDef, getCoreRowModel } from "@tanstack/react-table"
+import { Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useReducer, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -77,7 +78,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
         const original = row.original
         const disabled = original.is_paid_id ? true : false
         return(
-          <Button variant='link' disabled={disabled} size='sm'  onClick={() => handleOnPayIdClicked(original)}>
+          <Button variant='link' disabled={disabled} size='sm' className="h-0" onClick={() => handleOnPayIdClicked(original)}>
             {disabled ? (<span className="text-xs">PAID</span>) : (<span>PAY ID</span>)}
           </Button>
         )
@@ -86,18 +87,23 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   ]
   
   const studentTable = useDataTable({
-    data : rows,
+    data : enrolledStudents,
     columns : colums,
     getCoreRowModel : getCoreRowModel(),
     enableMultiRowSelection: false,
   })
+  const {
+    register,  
+    handleSubmit,
+    formState : {isSubmitting}
+  } = useForm<{search : string}>()
 
   const handleOnPayIdClicked = async ( std :TEnromentStudent) => {
     setStudent(std)
     setIsOpen(true)
   }
 
-  const handleSubmit : SubmitHandler<{enrolled_id : number}> = async (data) => {
+  const handlePaymentSubmit : SubmitHandler<{enrolled_id : number}> = async (data) => {
     const request =  await trigger(JSON.stringify(data))
     
     if(!request.ok){ 
@@ -112,18 +118,40 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     router.refresh()
     setIsOpen(false)
   }
+  const handleSearchSubmit : SubmitHandler<{search : string}> = async (data) => {
+    const param = new URLSearchParams(data).toString()
+    const request = await fetch(`/api/enrolled?${param}`)  
 
+    if(!request.ok)   return toast.error('Something went wrong')
+    const response : TEnromentStudent[] = await request.json()
+
+    dispatchEnrolledStudents({action : 'INIT', students : response})
+    
+
+  }
   const renderModal = () => {
     if(isOpen && student) {
       return (
-        <PaymentIDModal open={isOpen} student={student} handleOpenChange={setIsOpen} handleOnPaymentSubmit={handleSubmit} isLoading={isMutating} />
+        <PaymentIDModal open={isOpen} student={student} handleOpenChange={setIsOpen} handleOnPaymentSubmit={handlePaymentSubmit} isLoading={isMutating} />
       )
     }
   }
 
   return (
     <div>
-      <DataTableCustomHook table={studentTable} />
+      <div className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(handleSearchSubmit)}>
+          <div className="flex gap-4 items-center">
+            <Input {...register('search')} placeholder="Search Student"/>
+            <Button size='sm' className="flex gap-2" type='submit' disabled={isSubmitting}>
+              <Search size={16}/>
+              Search
+            </Button>
+          </div>
+        </form>
+        <DataTableCustomHook table={studentTable} className="h-[37rem]" />
+      </div>
+
       {renderModal()}
     </div>
   )

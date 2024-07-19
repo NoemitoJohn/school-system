@@ -92,8 +92,6 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
- 
-
   const handleEnrollButtonClick = async (id : number) => {
     setStudentId(id)
     setOpen(true)
@@ -127,7 +125,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         const original = row.original
         return(
           // <EnrollButton id={original.id} />
-          <Button variant='link' onClick={() => handleEnrollButtonClick(original.id)}>
+          <Button variant='link' size='sm' className='h-0' onClick={() => handleEnrollButtonClick(original.id)}>
             Enroll
           </Button>
         )
@@ -188,10 +186,9 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   return (
     <div>
       <form onSubmit={handleSubmit(handleSearchSubmit)}>
-        <Label className='text-xs' >Search Name</Label>
-        <div className='flex gap-2'>
-          <Input  {...register("search", {required : false})} placeholder='Student Name'/>
-          <Button disabled={isSubmitting} type='submit'>
+        <div className='flex gap-2 items-center'>
+          <Input  {...register("search", {required : false})} placeholder='Search Student Name'/>
+          <Button disabled={isSubmitting} type='submit' size='sm'>
             <div className='flex gap-1'>
               <Search size={16}/>
               Search
@@ -200,7 +197,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         </div>
       </form>
       <div className='mt-4'>
-        <DataTableCustomHook table={studentTable} />
+        <DataTableCustomHook table={studentTable} className='h-[37rem]' />
       </div>
       {open && 
       (<Modal isOpen={open} id={studentId} sections={sections} gradeLevel={gradeLevel} handleOpenChange={setOpen} enrollSubmit={handleEnrollSubmit}/>)}

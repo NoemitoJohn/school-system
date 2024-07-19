@@ -1,3 +1,4 @@
+import MarginContainer from '@/components/container/MarginContainer'
 import Enrollment, { TEnromentStudent, TSection } from '@/components/EnrollmentSearch'
 import { getGradeLevels } from '@/server/gradeLevel'
 import { getSections } from '@/server/sections'
@@ -18,7 +19,12 @@ export default async function StudentEnrollment() {
   }
   return (
     <div>
-      <Enrollment rows={students} sections={sections} gradeLevel={gradeLevels}/>
+      <MarginContainer>
+        <div className='uppercase font-semibold'>Enrollment</div>
+        <div className='mt-3'>
+         <Enrollment rows={students} sections={sections} gradeLevel={gradeLevels}/>
+        </div>
+      </MarginContainer>
     </div>
   )
 }

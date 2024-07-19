@@ -2,9 +2,9 @@ import { TStudentID } from "@/app/student/print-id/page"
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
-import { and, asc, eq, ne, sql } from "drizzle-orm"
+import { and, asc, eq, ilike, ne, or, sql } from "drizzle-orm"
 
-export const getEnrolledStudent = async () => {
+export const getEnrolledStudent = async (name = '') => {
 
   try {
     const getStudents = db.select(
@@ -25,7 +25,8 @@ export const getEnrolledStudent = async () => {
     .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
     .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
     .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id))
-    .orderBy(asc(sections.school_year))
+    .where(or(ilike(students.first_name, `%${name}%`), ilike(students.last_name, `%${name}%`)))
+    // .orderBy(asc(sections.school_year))
     .as('sq')
 
     const getNotEnrolledStudent = await db.select().from(getStudents).where(ne(getStudents.enrolled_year, ''))
@@ -47,7 +48,7 @@ export const getEnrolledStudent = async () => {
   }
 }
 
-export const getEnrolledStudentWithPaidId = async () => {
+export const getEnrolledStudentWithPaidId = async (search = '') => {
   try {
     const getStudents = db.select(
     {
@@ -69,6 +70,7 @@ export const getEnrolledStudentWithPaidId = async () => {
     .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
     .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id))
     .orderBy(asc(sections.school_year))
+    .where(or(ilike(students.first_name, `%${search}%`),ilike(students.last_name, `%${search}%`) ))
     .as('sq')
 
     const getEnrolledStudent = await db.select().from(getStudents).where(and(ne(getStudents.enrolled_year, ''), eq(getStudents.is_id_paid, true)))

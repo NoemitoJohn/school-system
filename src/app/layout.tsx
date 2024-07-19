@@ -24,7 +24,7 @@ export default function RootLayout({
             position="top-center"
             reverseOrder={false}
            />
-          <div className="p-4 w-full overflow-auto">
+          <div className="w-full overflow-auto">
             {children}
           </div>
         </div>

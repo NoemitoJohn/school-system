@@ -9,7 +9,10 @@ import DataTableCustomHook from '@/components/DataTableCustomHook'
 import useDataTable from '@/hooks/useDataTable'
 import useSWRMutation from 'swr/mutation'
 import toast from 'react-hot-toast';
-import { supabase } from '@/database/supabase';
+import { Input } from '@/components/ui/input';
+import { RotateCcw, Search } from 'lucide-react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
 
 type TIdTemple = {
   front : '/ELEM/ELEM-F.png' | '/JHS/JHS-F.png' | '/SHS/SHS-F.png'
@@ -38,14 +41,11 @@ const colums : ColumnDef<TStudentID>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
+      <Button className='h-0 px-0' variant='ghost'
+        onClick={() => table.setRowSelection({})}
+      >
+        <RotateCcw size={17} strokeWidth={2.5} />
+      </Button>
     ),
     cell : ({row}) => (
       <Checkbox
@@ -88,51 +88,93 @@ const generateID = (students : TStudentID[]) => {
     orientation : 'landscape',
     unit: 'px',
   }).setFontSize(8);
-  // console.log(students)
 
   const width = doc.internal.pageSize.getWidth()
   const height = doc.internal.pageSize.getHeight()
   const w = width / 5
   const h = height / 2
+  const grade_levels = Object.keys(IdMapTemplate)
+
+  const elem_levels = grade_levels.slice(0, 7)
+  const jhs_levels = grade_levels.slice(7, 7+4)
+  const shs_levels = grade_levels.slice(-2)
+
   for (let x = 0; x < students.length; x++) {
     
     if(x > 5) break;
+    
+    const student = students[x] // student data
 
-    const student = students[x]
-
-
-    const frontIMG =  IdMapTemplate[student.grade_level].front
-    const backIMG = IdMapTemplate[student.grade_level].back
-    // front
-    doc.addImage(frontIMG, w * x, 0, w, h,) //front template
+    const frontIMG =  IdMapTemplate[student.grade_level].front // front template
+    const backIMG = IdMapTemplate[student.grade_level].back // back template
+    
+    
+    doc.addImage(frontIMG, w * x, 0, w, h,) //front img
     
     if(student.img_url) doc.addImage(student.img_url, 35 + (w * x), 50.2, 56, 81.5) // profile pic
-    else  
-
-
-    doc.text(student.lrn, 46 + w * x , 142)
-    doc.text(student.full_name.toUpperCase(), 16 + w * x, 162).setFontSize(8)
-    // back
-    doc.addImage(backIMG, w * x, h, w, h)
-    const grade_levels = Object.keys(IdMapTemplate)
-    // case statement grade level 
     
-    for (let y = 0; y < grade_levels.length ; y++) {
-      if(student.grade_level == grade_levels[y]){
-        doc.text(student.year_enrolled, 46 + w * x, h + 105 + (11 * y - 1))
+    doc.text(student.lrn, 46 + w * x , 142) // lrn
+    
+    doc.text(student.full_name.toUpperCase(), 16 + w * x, 162).setFontSize(8) // full name
+    
+    doc.addImage(backIMG, w * x, h, w, h) // back img
+
+    if(student.qr) doc.addImage(student.qr, 41.5 + (w * x), h + 19, 44.5, 49); // qrcode
+    
+    switch(student.grade_level) {
+      case "KINDER 2":
+      case 'GRADE 1':
+      case 'GRADE 2':
+      case 'GRADE 3':
+      case 'GRADE 4':
+      case 'GRADE 5':
+      case 'GRADE 6':
+        for (let y = 0; y < elem_levels.length ; y++) { // grade ELEM
+          if(student.grade_level == elem_levels[y]){
+            doc.text(student.year_enrolled, 46 + w * x, h + 105 + (11 * y - 2))
+            break;
+          }
+        }
         break;
-      }
+      case 'GRADE 7':
+      case 'GRADE 8':
+      case 'GRADE 9':
+      case 'GRADE 10':
+        for (let y = 0; y < jhs_levels.length ; y++) { // grade JHS
+          if(student.grade_level == jhs_levels[y]){
+            doc.text(student.year_enrolled, 49 + w * x, h + 110 + (16 * y))
+            break;
+          }
+        }
+        break;
+      case 'GRADE 11':
+      case 'GRADE 12':
+        for (let y = 0; y < shs_levels.length ; y++) { // grade SHS
+          if(student.grade_level == shs_levels[y]){
+            doc.text(student.year_enrolled, 48 + w * x, h + 110 + (16 * y))
+            break;
+          }
+        }
+        break;
     }
-    doc.text(student.parent_number, 46 + w * x, height - 25)
+    doc.text(student.parent_number, 46 + w * x, height - 25) // parent number
   }
+  const blob = doc.output('blob')
   
-  doc.output('dataurlnewwindow')
+  return URL.createObjectURL(blob)
 }
 
 
 export default function PrintID({rows}: {rows : TStudentID[]}) {
+  const [students, setStudents] = useState(rows)
   const [selectionState, setSelectionState] = useState<Record<string, boolean>>({})
-  const { trigger, isMutating } = useSWRMutation('/api/student-id', fetcher)
+  const { trigger, isMutating } = useSWRMutation('/api/student-id/print', fetcher)
+
+  const {
+    register,
+    handleSubmit,
+    formState : {isSubmitting}
+  } = useForm<{search : string}>()
   
   const handlePreview = async () => {
     const keys = Object.keys(selectionState)
@@ -148,9 +190,11 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
     }
     
     const studentInfo : TStudentID[] = await response.json()
-
-
-    generateID(studentInfo)
+    
+    const url  = generateID(studentInfo)
+    
+    if(url) window.open(url);
+  
   }
 
   function handleSelectionStateChange (updater : Updater<RowSelectionState>)  {
@@ -164,10 +208,24 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
     }
     return setSelectionState(updater)
   } 
+  
+  const handleSearchSumbit : SubmitHandler<{search : string}> = async (data) => {
+    const searchParams = new URLSearchParams(data).toString()
+    
+    const request = await fetch(`/api/student-id?${searchParams}`)
+    
+    if(!request.ok) return toast.error('Something went wrong');
+
+    const response : TStudentID[] = await request.json()
+
+    setStudents(response)
+
+  }
+
 
   const studentTable = useDataTable({
     columns : colums,
-    data : rows,
+    data : students,
     getCoreRowModel : getCoreRowModel(),
     onRowSelectionChange : handleSelectionStateChange,
     getRowId : orignal => {
@@ -178,17 +236,33 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
     }
   })
 
-  
   return(
     <>
-    <DataTableCustomHook table={studentTable}  />
-    <Button onClick={() => handlePreview()} disabled={isMutating}>
-      {isMutating ? (
-        <span>Generating...</span>
-      ) : (
-        <span>Generate</span>
-      )}
-    </Button>
+    <div>
+      <form onSubmit={handleSubmit(handleSearchSumbit)}>
+        <div className='flex gap-3'>
+          <Input {...register('search')} placeholder='Search Student'/>
+          <Button className='flex gap-1' disabled={isSubmitting}><Search size={16}/>Search</Button>
+        </div>
+
+      </form>
+      <div className='mt-4 flex flex-col h-full gap-3'>
+        <div >
+          <DataTableCustomHook table={studentTable} className='h-[37rem]'/>
+        </div>
+        <div className='flex justify-end'>
+          <Button onClick={() => handlePreview()} disabled={isMutating}>
+            {isMutating ? (
+              <span>Generating...</span>
+            ) : (
+              <span>Generate</span>
+            )}
+          </Button>
+
+        </div>
+      </div>
+      
+    </div>
     </>
   )
 }
