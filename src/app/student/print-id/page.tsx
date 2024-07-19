@@ -3,6 +3,7 @@ import PrintID from "./PrintID"
 import elemIdTemplate from '@/id-template/ELEM.jpg'
 import MarginContainer from "@/components/container/MarginContainer"
 
+export const revalidate = 0
 
 export type TStudentID = {
   id: number
