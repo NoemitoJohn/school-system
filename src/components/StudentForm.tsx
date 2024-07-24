@@ -1,5 +1,6 @@
 'use client'
 import { useForm, SubmitHandler, Controller } from "react-hook-form"
+import readXlsxFile, { Row } from 'read-excel-file'
 import { Save } from 'lucide-react';
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -10,9 +11,126 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { addStudent } from "@/server/actions/actions";
 import Dropdown from "./Dropdown";
 import { TBarangay, TCity, TProvince } from "@/app/student/add/page";
+import { ChangeEvent, useState } from "react";
+import useSWRMutation from "swr/mutation";
+import { useRouter } from "next/navigation";
+
+
+export type TxlsxStudent = {
+  lrn : string
+  full_name :string
+  gender :string
+  birth_date :string
+  age :string
+  mother_tongue : string
+  religion : string
+  barangay : string
+  city_municipality : string
+  province : string
+  father_name : string
+  mother_name : string
+  first_name : string
+  last_name : string
+  middle_name : string
+}
+
+type XLSXkeys = Array<keyof TxlsxStudent>
+
+function getStudentFromRow(rows : Row[]) {
+  const keys = [
+    'lrn',
+    'full_name',
+    'gender',
+    'birth_date',
+    'age',
+    'mother_tongue',
+    'religion',
+    'barangay',
+    'city_municipality',
+    'province',
+    'father_name',
+    'mother_name'
+  ]
+
+  let index = 6
+  const studentsTemp :any = []
+
+  while (true) { 
+    
+    const row = rows[index]
+    
+    if(!row) break;
+    
+    const filterNull = row.filter(c => c != null) // L 14
+
+    if(filterNull.length <= 1) break;
+
+    if(filterNull.length < 3) { index++ ; continue };
+    
+    const studentInfo = filterNull.slice(0, filterNull.length -2);
+    const temp : Record<string, string> = {}
+    for(let i = 0; i < studentInfo.length; i++){
+      temp[keys[i]] = studentInfo[i] as string
+    }
+
+    studentsTemp.push(temp)
+    index++
+  }
+
+  const students : TxlsxStudent[] = studentsTemp
+  return students
+} 
+
+async function parseXLSX(file : File) {
+  try {
+    const rows = await readXlsxFile(file)
+    const studentTemp = getStudentFromRow(rows)
+    
+    const students = studentTemp.map(s => {
+      const name = transformName(s)
+      return {
+        ...s, ...name,
+        gender : s.gender === 'M' ? 'MALE' : 'FEMALE'
+      }
+    })
+    
+    // console.log(students)
+    return students
+  } catch (error) {
+    throw 'Something went wrong during parsing'
+  }
+}
+
+function transformName (student : TxlsxStudent) { 
+  const names = student.full_name.split(',')
+  const keys : XLSXkeys  = ['last_name', 'first_name', 'middle_name']
+  
+  const name : Partial<Record<keyof TxlsxStudent, string>> = {}
+
+  for (const i in names) {
+    const trim = names[i].trim()
+    if(trim == '-') 
+      name[keys[i]] = '';
+    else
+      name[keys[i]] = trim;
+  }
+
+  return name
+}
+
+async function uploadXLSX(url : string, {arg} : {arg : {students : Array<TxlsxStudent>}}) {
+  return fetch(url, {
+    method : 'POST',
+    body : JSON.stringify(arg.students) 
+  })
+}
+
+
 
 export default function StudentForm({provinces, city, barangay} : {provinces : TProvince[], city : TCity[], barangay : TBarangay[]}) {
-
+  const [file, setFile] = useState<File>()
+  const {trigger, isMutating} = useSWRMutation('/api/student/xlsx', uploadXLSX)
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -24,8 +142,33 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
     resolver : zodResolver(StudentSchema)
   })
 
+  const onHandleGenerateClicked = async () => {
+    if(!file) return;
+    try {
+      const students = await parseXLSX(file)
+      // const result = await 
+      // console.log(result)
+      const result = await toast.promise(trigger({students : students}), {
+        loading : 'Please wait',
+        success : (data) => {
+          if(!data.ok){
+            throw new Error(data.statusText);
+          }
+          return "Saved!";
+        },
+        error : (err : Error) => err.message
+      })
+      // console.log(result)
+      if(result.ok) router.refresh()
+        
+    } catch (error) {
+      
+    }
+    // console.log(content)
+  }
+
   const onSubmit : SubmitHandler<TStudent> = async (data) => {
-    // console.log(data.da)
+
     const file =  data.profile_pic?.[0] as File
     const formData = new FormData()
     formData.append('fileImage', file)
@@ -39,9 +182,13 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
     reset()
   }
 
+  const handleFileInputChange = (e : ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files) setFile(e.target.files[0])
+  }
+
   const proviceCode = watch('address.province', '')
   const cityCode = watch('address.city', '')
-  console.log(errors)
+
   const cities = city.filter(c => c.province_code === proviceCode)
   const barangays = barangay.filter(b => b.city_code === cityCode)
   return (
@@ -51,9 +198,23 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
         <div className="border-slate-400 border-b">
           <p className='font-bold'>Student Infomation</p>
         </div>
-        <div className="inline-block mt-2">
-          <Label className="text-xs">Student Photo</Label>
-          <Input {...register("profile_pic")} type="file" />
+        <div className="flex justify-between">
+          <div className="inline-block mt-2">
+            <Label className="text-xs">Student Photo</Label>
+            <Input {...register("profile_pic")} type="file" />
+          </div>
+          <div className="flex items-end gap-2">
+
+            <div className="inline-block mt-2">
+              <Label className="text-xs">Exel File</Label>
+              <Input onChange={handleFileInputChange} type="file"  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </div>
+              <Button variant='link' className='px-0' size='sm' type='button'
+                onClick={() => onHandleGenerateClicked()}
+                disabled={isMutating}
+              >Generate</Button>
+          </div>
+
         </div>
         <div className='flex gap-4 mt-2'> {/* student name 1st section*/}
           <div className='flex-1'>

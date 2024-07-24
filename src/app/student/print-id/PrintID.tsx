@@ -158,7 +158,8 @@ const generateID = (students : TStudentID[]) => {
         }
         break;
     }
-    doc.text(student.parent_number, 46 + w * x, height - 25) // parent number
+    if(student.parent_number)
+      doc.text(student.parent_number, 46 + w * x, height - 25) // parent number
   }
   const blob = doc.output('blob')
   

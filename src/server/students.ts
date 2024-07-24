@@ -1,4 +1,5 @@
 'use server'
+import readXlsxFile from 'read-excel-file/node'
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
@@ -62,14 +63,17 @@ export async function getStudentEnrollment() {
     )
     
 
-    const formatStudent : TEnromentStudent[] = getStudents.map(s => ({
-      id : s.id,
-      lrn : s.lrn,
-      full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
-      grade_level : s.grade_level_name,
-      section : s.section_name,
-      year_enrolled : s.enrolled_year
-    }))
+    const formatStudent : TEnromentStudent[] = getStudents.map(s => {
+      const mName = s.middle_name ? s.middle_name.at(0) : ''
+      return {
+        id : s.id,
+        lrn : s.lrn,
+        full_name : `${s.last_name}, ${s.first_name} .${mName}`,
+        grade_level : s.grade_level_name,
+        section : s.section_name,
+        year_enrolled : s.enrolled_year
+      }
+    })
 
     return formatStudent
 
@@ -201,4 +205,9 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
   {
     revalidatePath('/student/enrollment')
   }
+}
+
+
+export async function addStudentFromXLXS(buffer: ArrayBuffer) {
+  // readXlsxFile().then(row => console.log(row)).catch((e) => console.log(e))
 }
