@@ -206,7 +206,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           <div className="flex items-end gap-2">
 
             <div className="inline-block mt-2">
-              <Label className="text-xs">Exel File</Label>
+              <Label className="text-xs">Excel File</Label>
               <Input onChange={handleFileInputChange} type="file"  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
             </div>
               <Button variant='link' className='px-0' size='sm' type='button'
