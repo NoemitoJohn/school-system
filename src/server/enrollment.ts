@@ -75,18 +75,20 @@ export const getEnrolledStudentWithPaidId = async (search = '') => {
 
     const getEnrolledStudent = await db.select().from(getStudents).where(and(ne(getStudents.enrolled_year, ''), eq(getStudents.is_id_paid, true)))
 
-    const formatStudent : TStudentID[] = getEnrolledStudent.map(s => ({
-      id : s.id,
-      lrn : s.lrn,
-      full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
-      grade_level : s.grade_level_name,
-      parent_number : s.parent_number,
-      section : s.section_name,
-      is_paid_id : s.is_id_paid,
-      year_enrolled : s.enrolled_year,
-      enrolled_id : s.enrolled_id
-    }))
-
+    const formatStudent : TStudentID[] = getEnrolledStudent.map(s => {
+      const mName = s.middle_name ? s.middle_name.at(0) : ''
+      return {
+        id : s.id,
+        lrn : s.lrn,
+        full_name : `${s.last_name}, ${s.first_name} .${mName}`,
+        grade_level : s.grade_level_name,
+        parent_number : s.parent_number,
+        section : s.section_name,
+        is_paid_id : s.is_id_paid,
+        year_enrolled : s.enrolled_year,
+        enrolled_id : s.enrolled_id
+      }
+    })
     return formatStudent
 
   } catch (error) {

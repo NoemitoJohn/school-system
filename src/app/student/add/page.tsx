@@ -28,13 +28,11 @@ export type TBarangay = {
   region_code: string
 }
 
-
 export default async function StudentAdd() {
-  const provinces = JSON.parse(JSON.stringify(provinceJSON))
-  const city = JSON.parse(JSON.stringify(cityJSON))
-  const barangay = JSON.parse(JSON.stringify(barangayJSON))
+  const provinces = JSON.parse(JSON.stringify(provinceJSON)) as Array<TProvince>
+  const city = JSON.parse(JSON.stringify(cityJSON)) as Array<TCity>
+  const barangay = JSON.parse(JSON.stringify(barangayJSON)) as Array<TBarangay>
   //TODO optimize
-  
   return (
     <div>
       <MarginContainer>

@@ -36,6 +36,7 @@
     "react-hook-form": "^7.52.0",
     "react-hot-toast": "^2.4.1",
     "react-pro-sidebar": "^1.1.0",
+    "read-excel-file": "^5.8.4",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",

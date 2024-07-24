@@ -22,10 +22,11 @@ export async function GET(request: NextRequest) {
     if(!bindWithImgUrl) return // handle error
 
     const formatStudent : TStudentID[] = bindWithImgUrl.map( s => {
+      const mName = s.middle_name ? s.middle_name.at(0) : ''
       return {
         id : s.id,
         lrn : s.lrn,
-        full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
+        full_name : `${s.last_name}, ${s.first_name} .${mName}`,
         grade_level : s.grade_level_name,
         parent_number : s.parent_number,
         section : s.section_name,
