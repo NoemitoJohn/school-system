@@ -1,22 +1,19 @@
 'use client';
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Button } from './ui/button'
-import {  Search } from 'lucide-react';
-import { ColumnDef, getCoreRowModel } from "@tanstack/react-table"
-import DataTable from '@/components/DataTable';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { FileSpreadsheet, Search } from 'lucide-react';
+import { ColumnDef, getCoreRowModel } from "@tanstack/react-table";
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { searchStudentEnrollment } from '@/server/students';
 import { useEffect, useReducer, useState } from 'react';
-import useSWR, { Fetcher } from 'swr'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from '@/validation/schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Dropdown from '@/components/Dropdown';
+import { TStudentEnrollmentSchema } from '@/validation/schema';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import useDataTable from '@/hooks/useDataTable';
 import DataTableCustomHook from './DataTableCustomHook';
+
+import ModalStudentInfo from '@/app/student/enrollment/ModalStudentInfo';
+import ModalUploadXlxs from '@/app/student/enrollment/ModalUploadXlxs';
 
 export type TEnromentStudent = {
   id: number
@@ -44,7 +41,6 @@ export type TSection = {
   grade_level_id : string
   school_year : string
 }
-
 
 type TStudentEnrollmentAction = {
   action : 'INIT' | 'UPDATE' | 'ADD' | 'DELETE'
@@ -89,12 +85,18 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
 
   const [state, dispatchStudentEnrollment] = useReducer(studentReducer, rows)
   const [studentId, setStudentId] = useState<number>(0)
-  const [open, setOpen] = useState(false)
+  const [openStudentInfo, setOpenStudentInfo] = useState(false)
+  const [openUploadXlsx, setOpenUploadXlsx] = useState(false)
+
   const router = useRouter()
+  
+  useEffect(() => {
+    dispatchStudentEnrollment({action : 'INIT', students : rows})
+  }, [rows])
 
   const handleEnrollButtonClick = async (id : number) => {
     setStudentId(id)
-    setOpen(true)
+    setOpenStudentInfo(true)
   }
 
   const columns : ColumnDef<TEnromentStudent>[] = [
@@ -132,7 +134,6 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       }
     }
   ]
-
 
   const studentTable = useDataTable({
     data : state,
@@ -175,8 +176,8 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       dispatchStudentEnrollment({action : 'DELETE', id : response.student_id})
 
       toast.success('Save Successfully')
-      router.refresh()
-      setOpen(false)
+      // router.refresh()
+      setOpenStudentInfo(false)
 
     } catch (error) {
       
@@ -185,8 +186,14 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
 
   return (
     <div>
+      <div className='flex justify-end'>
+        <Button size='sm' className='flex gap-1 items-center' onClick={() => setOpenUploadXlsx(true)}>
+          <FileSpreadsheet size={20} />
+          Upload Student Excel
+        </Button>
+      </div>
       <form onSubmit={handleSubmit(handleSearchSubmit)}>
-        <div className='flex gap-2 items-center'>
+        <div className='flex gap-2 items-center mt-2'>
           <Input  {...register("search", {required : false})} placeholder='Search Student Name'/>
           <Button disabled={isSubmitting} type='submit' size='sm'>
             <div className='flex gap-1'>
@@ -199,189 +206,16 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       <div className='mt-4'>
         <DataTableCustomHook table={studentTable} className='h-[37rem]' />
       </div>
-      {open && 
-      (<Modal isOpen={open} id={studentId} sections={sections} gradeLevel={gradeLevel} handleOpenChange={setOpen} enrollSubmit={handleEnrollSubmit}/>)}
-    </div>
-  )
-}
-
-
-// MODAL COMPONENT
-const Modal = ({isOpen, id, handleOpenChange, enrollSubmit, sections, gradeLevel } : {isOpen : boolean, id : number, sections : TSection[], gradeLevel : TGradeLevel[], handleOpenChange : (open : boolean) => void
-  enrollSubmit : SubmitHandler<TStudentEnrollmentSchema>
-}) => {
-
-  const fetcher : Fetcher<TStudentEnrollmentSchema, string> = async (args : string) => {
-    const request = await fetch(args)
-
-    if(!request.ok){
-      const error = new Error('An error occurred while fetching the data.')
-      throw error
-    }
-
-    const respose : TStudentEnrollmentSchema = await request.json()
-    return respose
-  }
-
-  const {data : student, error, isLoading} = useSWR<TStudentEnrollmentSchema, Error>(`/api/student/${id}`, fetcher )
-  const [sectionsState, setSectionsState] = useState(sections)
-  const [gradeLevelState, setGradelevelState] = useState(gradeLevel)
-  const [schoolYear, setSchoolYear] = useState(sections)
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    setValue,
-    formState : {errors, isSubmitting}
-  } = useForm<TStudentEnrollmentSchema>({
-    resolver : zodResolver(StudentEnrollmentSchema)
-  })
-
-  useEffect(() => {
-    if(student){
-      setValue('id', student.id)
-      setValue('full_name', student.full_name)
-    }
-  }, [student])
-
-
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      if(type == 'change') {
-        if(name == 'grade_level'){
-          const grade_level_id = value.grade_level
-          const filterSection = sections.filter((v) => v.grade_level_id == grade_level_id)
-          setSectionsState(filterSection)
-        }
-        if(name == 'section') {
-          const section_id = value.section
-          const filterSection = sections.filter((v) => v.id == section_id)
-          setSchoolYear(filterSection)
-        }
-      } else {
-          const section_id = value.section
-          if(section_id) {
-            const filterSection = sections.filter((v) => v.id == section_id)
-            setSchoolYear(filterSection)
-          }
+      {openStudentInfo && 
+        <ModalStudentInfo isOpen={openStudentInfo} id={studentId} sections={sections} 
+          gradeLevel={gradeLevel} 
+          handleOpenChange={setOpenStudentInfo} 
+          enrollSubmit={handleEnrollSubmit} 
+        />
       }
-    })
-    return () => subscription.unsubscribe()
-  }, [watch])
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className='max-w-[60%]'>
-          <DialogHeader>
-            <DialogTitle>Enrolment Form</DialogTitle>
-          </DialogHeader>
-          {isLoading ? 
-          ( <div className='text-center'>...Loading</div>) :  ( 
-          <div>
-          {error ? (<div className='text-center text-red-500'>Something went Wrong</div>) : (
-            <div className='flex justify-evenly gap-6'>
-                <div>
-                  <div className="grid gap-4 py-4">
-                    <div className='text-center font-sans'>Current Grade Level</div>
-                    {!student?.school_year && (
-                      <div className='text-center italic'>No Records</div>
-                    ) }
-                    {student?.school_year && (
-                      <div className="grid grid-cols-4 items-center gap-2">
-                        <Label className='text-right'>Grade Level</Label>
-                        <div className="col-span-3"> 
-                          <Dropdown disabled label='Select Grade Level' items={gradeLevel} value={student?.grade_level}
-                            getValue={(p) => p.id}
-                            getLabel={(p) => p.level_name}
-                          />
-                        </div>
-                        <Label className='text-right'>Section</Label>
-                        <div className="col-span-3"> 
-                          <Dropdown disabled label='Select Section' items={sections}  value={student?.section}
-                            getValue={(p) => p.id}
-                            getLabel={(p) => p.section_name}
-                          />
-                        </div>
-                        <Label className='text-right'>School Year</Label>
-                        <div className="col-span-3"> 
-                          <Input disabled value={student?.school_year} />
-                        </div>
-                      </div>
-
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <form onSubmit={handleSubmit(enrollSubmit)}>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-2">
-                        <Label className='text-right'>Student Name</Label>
-                        <Input {...register('full_name')} placeholder='test' className="col-span-3" disabled/>
-                        <Controller
-                          name='grade_level'
-                          control={control}
-                          render={({field, formState}) => (
-                            <>
-                              <Label className='text-right'>Grade Level</Label>
-                              <div className="col-span-3"> 
-                                <Dropdown label='Select Grade Level' items={gradeLevelState} onChange={field.onChange} value={field.value}
-                                  getValue={(p) => p.id}
-                                  getLabel={(p) => p.level_name}
-                                />
-                              </div>
-                            </>
-                          )}
-                        />
-                        <Controller
-                          name='section'
-                          control={control}
-                          render={({field, formState}) => (
-                            <>
-                              <Label className='text-right'>Section</Label>
-                              <div className="col-span-3"> 
-                                <Dropdown label='Select Section' items={sectionsState} onChange={field.onChange} value={field.value}
-                                  getValue={(p) => p.id}
-                                  getLabel={(p) => p.section_name}
-                                />
-                              </div>
-                            </>
-                          )}
-                        />
-                        <Controller
-                          name='school_year'
-                          control={control}
-                          render={({field, formState}) => (
-                            <>
-                              <Label className='text-right'>School Year</Label>
-                              <div className="col-span-3"> 
-                                <Dropdown label='Select School Year' items={schoolYear} onChange={field.onChange} value={field.value}
-                                  getValue={(p) => p.school_year}
-                                  getLabel={(p) => p.school_year}
-                                />
-                              </div>
-                            </>
-                          )}
-                        />
-                      </div>
-                    </div>
-                    <div className='flex justify-end'>
-                      <Button type='submit' disabled={isSubmitting}>
-                        {isSubmitting ? 
-                          ( <span>Loading..</span> )
-                        : 
-                          ( <span>Submit</span> )
-                        }
-                        </Button>
-                    </div>
-                  </form>
-                </div>
-              
-            </div>
-          )}
-          </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {openUploadXlsx && 
+        <ModalUploadXlxs open={openUploadXlsx} onOpenChange={setOpenUploadXlsx} onHandleSuccess={() => {setOpenUploadXlsx(false)}}/>
+      }
+    </div>
   )
 }

@@ -27,10 +27,12 @@ export async function GET(request: Request, {params} : {params  : {id : string}}
       section : sql<string>`COALESCE(CAST(${enrolled_students.section_id} as TEXT), '')`.as('section'),
       school_year : sql<string>`COALESCE(CAST(${enrolled_students.school_year} as TEXT), '')`.as('school_year')
     }).from(getStudents).leftJoin(enrolled_students, eq(getStudents.enrollment_id, enrolled_students.enrolled_student_id));
-
+    
+    const mName = enrollments.middle_name ? enrollments.middle_name?.at(0) : ''
+    
     const enrollmentValue : TStudentEnrollmentSchema = { // default values
       id : enrollments.id,
-      full_name : `${enrollments.last_name}, ${enrollments.first_name} .${enrollments.middle_name?.at(0)}`,
+      full_name : `${enrollments.last_name}, ${enrollments.first_name} .${mName}`,
       grade_level : enrollments.grade_level ,
       school_year : enrollments.school_year, 
       section : enrollments.section,

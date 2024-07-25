@@ -179,23 +179,23 @@ const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit,
           <div className="grid grid-cols-6 items-center gap-2">
             <div className="col-span-2">
               <Label className="text-right text-xs">LRN</Label>
-              <Input disabled value={student.lrn} className="col-span-3"/>
+              <Input readOnly value={student.lrn} className="col-span-3"/>
             </div>
             <div className="col-span-4">
               <Label className="text-right text-xs">Student Name</Label>
-              <Input disabled value={student.full_name} className="col-span-3"/>
+              <Input readOnly value={student.full_name} className="col-span-3"/>
             </div>
             <div className="col-span-2">
               <Label  className="text-right text-xs">Grade Level</Label>
-              <Input disabled value={student.grade_level}/>
+              <Input readOnly value={student.grade_level}/>
             </div>
             <div className="col-span-2">
               <Label className="text-right text-xs">Section</Label>
-              <Input disabled value={student.section} />
+              <Input readOnly value={student.section} />
             </div>
             <div className="col-span-2">
               <Label  className="text-right text-xs">School Year</Label>
-              <Input disabled value={student.year_enrolled} />
+              <Input readOnly value={student.year_enrolled} />
             </div>
           </div>
           <Input {...register('enrolled_id', {required : true})} type='hidden' disabled/>

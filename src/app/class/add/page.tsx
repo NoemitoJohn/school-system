@@ -6,6 +6,7 @@ import { db } from '@/database/db'
 import { grade_levels, sections } from '@/database/schema'
 import { asc, eq, sql } from 'drizzle-orm'
 import DataTable from '@/components/DataTable'
+import MarginContainer from '@/components/container/MarginContainer'
 
 export const revalidate = 0
 
@@ -78,10 +79,12 @@ export default async function AddClass() {
 
   return (
    <>
-    <AddClassForm classes={classes} />
-    <div className='mt-5'>
-      <DataTable columns={columns} data={getClasses} />
-    </div>
+    <MarginContainer>
+      <AddClassForm classes={classes} />
+      <div className='mt-5'>
+        <DataTable columns={columns} data={getClasses} />
+      </div>
+    </MarginContainer>
    </>
   )
 }
