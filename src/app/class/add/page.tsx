@@ -63,10 +63,6 @@ export default async function AddClass() {
       accessorKey : 'school_year',
       header : 'School Year'
     },
-    {
-      accessorKey : 'created_by',
-      header : 'Created by'
-    },
   ]
   
   const getClasses = await db.select({
