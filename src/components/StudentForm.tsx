@@ -66,7 +66,6 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
             <Label className="text-xs">Student Photo</Label>
             <Input {...register("profile_pic")} type="file" />
           </div>
-
         </div>
         <div className='flex gap-4 mt-2'> {/* student name 1st section*/}
           <div className='flex-1'>
