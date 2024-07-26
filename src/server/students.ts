@@ -115,14 +115,17 @@ export async function searchStudentEnrollment(search : string) {
       )
     )
 
-    const formatSearchStudent : TEnromentStudent[] = searchStudent.map(s => ({
-      id : s.id,
-      lrn : s.lrn,
-      full_name : `${s.last_name}, ${s.first_name} .${s.middle_name?.at(0)}`,
-      grade_level : s.grade_level_name,
-      section : s.section_name,
-      year_enrolled : s.enrolled_year
-    })) 
+    const formatSearchStudent : TEnromentStudent[] = searchStudent.map(s => {
+      const mName = s.middle_name ? s.middle_name.at(0) : ''
+      return {
+        id : s.id,
+        lrn : s.lrn,
+        full_name : `${s.last_name}, ${s.first_name} .${mName}`,
+        grade_level : s.grade_level_name,
+        section : s.section_name,
+        year_enrolled : s.enrolled_year
+      }
+    }) 
     return formatSearchStudent
   } catch (error) {
     console.log(error)

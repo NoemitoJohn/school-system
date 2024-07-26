@@ -1,8 +1,6 @@
-
-import { TxlsxStudent } from "@/components/StudentForm";
+import { TxlsxStudent } from "@/app/student/enrollment/ModalUploadXlxs";
 import { db } from "@/database/db";
 import { students } from "@/database/schema";
-import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from 'qrcode';
 
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     const _ = await Promise.all(insertStudents)
 
-    revalidatePath('/student/enrollment', 'page')
+    // revalidatePath('/student/enrollment', 'page')
     return NextResponse.json({})  
   } catch (error) {
     return NextResponse.error()    
