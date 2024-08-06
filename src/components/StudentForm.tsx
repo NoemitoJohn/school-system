@@ -66,8 +66,8 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
             <Label className="text-xs">Student Photo</Label>
             <Input {...register("profile_pic")} type="file" />
           </div>
-        </div>
-        <div className='flex gap-4 mt-2'> {/* student name 1st section*/}
+        </div>  
+        <div className='flex flex-col gap-2 md:flex-row md:gap-4 mt-2'> {/* student name 1st section*/}
           <div className='flex-1'>
             <Label className={`text-xs ${errors.lrn && 'text-red-500'}`}>LRN</Label>
             <Input {...register("lrn", { required: true })} placeholder='Last Name'/>
@@ -89,7 +89,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
             <Input {...register("ext_name")} placeholder='Extension Name'/>
           </div>
         </div>
-        <div className='flex gap-4'> {/* student name 2nd section*/}
+        <div className='flex flex-col gap-2 md:flex-row md:gap-4 '> {/* student name 2nd section*/}
           <div className='flex-1'>
           <Controller
             name="gender"
@@ -119,7 +119,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           <p className='font-bold'>Parent Information</p>
         </div>
         <p className='font-medium text-xs mt-2'>Father&apos;s Name</p>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2 md:flex-row md:gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
             <Input {...register("parent.father.last_name")}  placeholder='Last Name'/>
@@ -139,7 +139,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
         </div>
         <p className='font-medium text-xs mt-2'>Mother&apos;s Maiden Name</p>
         
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2 md:flex-row md:gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
             <Input {...register("parent.mother.last_name")} placeholder='Last Name'/>
@@ -154,7 +154,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           </div>
         </div>
         <p className='font-medium text-xs mt-2'>Guardian&apos;s Name</p>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2 md:flex-row md:gap-4">
           <div className='flex-1'>
             <Label className='text-xs'>Last Name</Label>
             <Input {...register("parent.guardian.last_name")} placeholder='Last Name'/>

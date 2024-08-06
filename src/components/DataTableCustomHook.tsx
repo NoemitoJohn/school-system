@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 export default function DataTableCustomHook<T>({table, handleRowClick, className } : {table : Table<T> , handleRowClick? : (original : T) => void, className? : string }) {
   return (
-    <div className='rounded-md border'>
+    <div className='rounded-sm border-[1.5px] shadow-md'>
       <div className={cn("relative w-full overflow-auto", className)}>
         <TB>
           <TableHeader>
