@@ -11,7 +11,7 @@ export default function SideBar() {
 
   const [windowSize, setWindowSize] = useState<number>()
   const breakPoint = useMediaQueryListener(1000)
-  const [hide, setHide] = useState<boolean>(false)
+  const [hide, setHide] = useState<boolean>(true)
   const [toggled, setToggled] = useState<boolean>(false)
 
 
@@ -21,7 +21,7 @@ export default function SideBar() {
 
   
   return (
-    <div className='border-r shadow-sm'>
+    <div className='h-full'>
       <div className={`h-full ${hide ? `${toggled ? 'fixed z-30 bg-[#f9fafb] left-0' : 'fixed z-30 bg-[#f9fafb] left-[-250px] '} `: ''}`} >    
           <Sidebar backgroundColor='#f9fafb' 
             rootStyles={{
