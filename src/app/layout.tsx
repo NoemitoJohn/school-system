@@ -17,9 +17,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={poppins.className}>
+      <body className={`${poppins.className}`}>
         <div className="flex h-screen">
-          <SideBar />
+          <div className="h-full">
+            <SideBar />
+          </div>
           <Toaster
             position="top-center"
             reverseOrder={false}
