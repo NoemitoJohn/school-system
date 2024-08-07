@@ -16,9 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${poppins.className}`}>
-        <div className="flex h-screen">
+    <html lang="en" className="h-full">
+      <body className={`${poppins.className} h-full`}>
+        <div className="flex ">
           <div className="h-full">
             <SideBar />
           </div>
@@ -26,7 +26,7 @@ export default function RootLayout({
             position="top-center"
             reverseOrder={false}
            />
-          <div className="w-full overflow-auto">
+          <div className="w-full overflow-y-auto">
             {children}
           </div>
         </div>

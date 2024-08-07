@@ -7,10 +7,10 @@ import { Sidebar, Menu as SMenu  , MenuItem, SubMenu } from 'react-pro-sidebar';
 import { Button } from './ui/button';
 
 export default function SideBar() {
+  
   const path = usePathname()
-
-  const [windowSize, setWindowSize] = useState<number>()
-  const breakPoint = useMediaQueryListener(1000)
+  const breakPoint = useMediaQueryListener(768)
+  
   const [hide, setHide] = useState<boolean>(true)
   const [toggled, setToggled] = useState<boolean>(false)
 
@@ -43,7 +43,7 @@ export default function SideBar() {
               >
               <SubMenu label="Student" defaultOpen  >
                 <MenuItem active={path === '/student/add'} component={<Link href='/student/add' />}> Add Student </MenuItem>
-                <MenuItem active={path === '/student/enrollment'} component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
+                <MenuItem  active={path === '/student/enrollment'} component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
                 <MenuItem active={path === '/student/endrolled'} component={<Link href='/student/endrolled' />} > Endrolled Student</MenuItem>
                 <MenuItem active={path === '/student/print-id'} component={<Link href='/student/print-id' />} > Print ID</MenuItem>
               </SubMenu>
@@ -72,10 +72,13 @@ export default function SideBar() {
           </div>
           }
       </div>
-      {hide && 
-        <Button variant='ghost' onClick={() => setToggled(true)} >
-          <Menu color='hsl(var(--primary))' />
-        </Button>
+      {hide && (
+        <div>
+          <Button  variant='ghost' className='rounded-lg' onClick={() => setToggled(true)} >
+            <Menu color='hsl(var(--primary))' />
+          </Button>
+        </div>
+      )
       }
     </div>
   )
