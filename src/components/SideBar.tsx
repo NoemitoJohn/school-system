@@ -43,7 +43,7 @@ export default function SideBar() {
               >
               <SubMenu label="Student" defaultOpen  >
                 <MenuItem active={path === '/student/add'} component={<Link href='/student/add' />}> Add Student </MenuItem>
-                <MenuItem active={path === '/student/enrollment'} component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
+                <MenuItem  active={path === '/student/enrollment'} component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
                 <MenuItem active={path === '/student/endrolled'} component={<Link href='/student/endrolled' />} > Endrolled Student</MenuItem>
                 <MenuItem active={path === '/student/print-id'} component={<Link href='/student/print-id' />} > Print ID</MenuItem>
               </SubMenu>
@@ -73,8 +73,8 @@ export default function SideBar() {
           }
       </div>
       {hide && (
-        <div >
-          <Button variant='ghost' onClick={() => setToggled(true)} >
+        <div>
+          <Button  variant='ghost' className='rounded-lg' onClick={() => setToggled(true)} >
             <Menu color='hsl(var(--primary))' />
           </Button>
         </div>
