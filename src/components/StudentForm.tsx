@@ -176,7 +176,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           </div>
           <div className="flex flex-col gap-1 mt-2">
 
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-2 md:flex-row md:gap-4">
               <div className="flex-1">
               
               <Controller
@@ -214,7 +214,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
                 />
               </div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-2 md:flex-row md:gap-4">
               <div className="flex-1">
                 <Controller
                   name="address.barangay"
