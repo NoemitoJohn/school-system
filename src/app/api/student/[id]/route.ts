@@ -6,16 +6,16 @@ import { eq, sql } from "drizzle-orm"
 
 export async function GET(request: Request, {params} : {params  : {id : string}}) {
   const {id} = params
-  
+  console.log(9, id)
   try {
     let getStudents =  db.select({
-      id : students.student_id,
+      id : students.id,
       first_name : students.first_name,
       last_name : students.last_name,
       middle_name : students.middle_name,
-      enrollment_id : sql<number>`COALESCE(${students.enrollment_id}, -1)`.as('enrollment_id')
+      enrollment_id : sql<string>`COALESCE(${students.enrollment_id}, '')`.as('enrollment_id')
     }).from(students)
-    .where(eq(students.student_id, Number(id)))
+    .where(eq(students.id, id))
     .as('sq');
 
     const [enrollments] = await db.select({
@@ -26,7 +26,7 @@ export async function GET(request: Request, {params} : {params  : {id : string}}
       grade_level : sql<string>`COALESCE(CAST(${enrolled_students.grade_level_id} as TEXT), '')`.as('grade_level') ,
       section : sql<string>`COALESCE(CAST(${enrolled_students.section_id} as TEXT), '')`.as('section'),
       school_year : sql<string>`COALESCE(CAST(${enrolled_students.school_year} as TEXT), '')`.as('school_year')
-    }).from(getStudents).leftJoin(enrolled_students, eq(getStudents.enrollment_id, enrolled_students.enrolled_student_id));
+    }).from(getStudents).leftJoin(enrolled_students, eq(getStudents.enrollment_id, enrolled_students.id));
     
     const mName = enrollments.middle_name ? enrollments.middle_name?.at(0) : ''
     
@@ -40,6 +40,7 @@ export async function GET(request: Request, {params} : {params  : {id : string}}
 
     return Response.json(enrollmentValue)
   } catch (error) {
+    console.log(error)
     Response.error()
   }
 }

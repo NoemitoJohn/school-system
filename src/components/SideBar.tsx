@@ -61,6 +61,23 @@ export default function SideBar() {
             >
               <SubMenu label="Class" defaultOpen >
                 <MenuItem active={path === '/class/add'} component={<Link href='/class/add' />}> Add Class </MenuItem>
+                <MenuItem active={path === '/class/sections'} component={<Link href='/class/sections' />}> Sections & Advisory </MenuItem>
+              </SubMenu>
+            </SMenu>
+            <SMenu
+            menuItemStyles={{
+              button : ({ level, active, disabled }) => { 
+                return {
+                  backgroundColor: active ? 'hsl(var(--secondary))' : undefined,
+                  color: active ? 'hsl(var(--primary))' : undefined
+                }
+              }
+            }}
+            renderExpandIcon={({open}) => <span>{open ? (<Minus size={18} />) : (<Plus size={18}/>)}</span>}
+            >
+              <SubMenu label="Faculty" defaultOpen >
+                <MenuItem active={path === '/faculty/teacher'} component={<Link href='/faculty/teacher' />}>Teachers </MenuItem>
+                {/* <MenuItem active={path === '/class/sections'} component={<Link href='/class/sections' />}> Sections & Advisory </MenuItem> */}
               </SubMenu>
             </SMenu>
           </Sidebar>

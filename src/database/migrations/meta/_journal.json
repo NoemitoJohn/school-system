@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1720509345243,
-      "tag": "0000_huge_loners",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1720749772155,
-      "tag": "0001_plain_surge",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1721189691998,
-      "tag": "0002_sleepy_morlun",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1721273119217,
-      "tag": "0003_flaky_maggott",
+      "when": 1723687673525,
+      "tag": "0000_special_crystal",
       "breakpoints": true
     }
   ]

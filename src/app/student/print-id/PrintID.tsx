@@ -93,6 +93,7 @@ const generateID = (students : TStudentID[]) => {
   const height = doc.internal.pageSize.getHeight()
   const w = width / 5
   const h = height / 2
+
   const grade_levels = Object.keys(IdMapTemplate)
 
   const elem_levels = grade_levels.slice(0, 7)
@@ -105,10 +106,13 @@ const generateID = (students : TStudentID[]) => {
     
     const student = students[x] // student data
 
-    const frontIMG =  IdMapTemplate[student.grade_level].front // front template
-    const backIMG = IdMapTemplate[student.grade_level].back // back template
+    const level = student.grade_level.toUpperCase()
+    const frontIMG =  IdMapTemplate[level].front // front template
+    const backIMG = IdMapTemplate[level].back // back template
     
-    
+    // console.log(111, IdMapTemplate)
+    // console.log(111, frontIMG)
+
     doc.addImage(frontIMG, w * x, 0, w, h,) //front img
     
     if(student.img_url) doc.addImage(student.img_url, 35 + (w * x), 50.2, 56, 81.5) // profile pic
@@ -121,7 +125,7 @@ const generateID = (students : TStudentID[]) => {
 
     if(student.qr) doc.addImage(student.qr, 41.5 + (w * x), h + 19, 44.5, 49); // qrcode
     
-    switch(student.grade_level) {
+    switch(level) {
       case "KINDER 2":
       case 'GRADE 1':
       case 'GRADE 2':
@@ -130,7 +134,7 @@ const generateID = (students : TStudentID[]) => {
       case 'GRADE 5':
       case 'GRADE 6':
         for (let y = 0; y < elem_levels.length ; y++) { // grade ELEM
-          if(student.grade_level == elem_levels[y]){
+          if(level == elem_levels[y]){
             doc.text(student.year_enrolled, 46 + w * x, h + 105 + (11 * y - 2))
             break;
           }
@@ -141,7 +145,7 @@ const generateID = (students : TStudentID[]) => {
       case 'GRADE 9':
       case 'GRADE 10':
         for (let y = 0; y < jhs_levels.length ; y++) { // grade JHS
-          if(student.grade_level == jhs_levels[y]){
+          if(level == jhs_levels[y]){
             doc.text(student.year_enrolled, 49 + w * x, h + 110 + (16 * y))
             break;
           }
@@ -150,7 +154,7 @@ const generateID = (students : TStudentID[]) => {
       case 'GRADE 11':
       case 'GRADE 12':
         for (let y = 0; y < shs_levels.length ; y++) { // grade SHS
-          if(student.grade_level == shs_levels[y]){
+          if(level == shs_levels[y]){
             doc.text(student.year_enrolled, 48 + w * x, h + 110 + (16 * y))
             break;
           }
@@ -191,7 +195,7 @@ export default function PrintID({rows}: {rows : TStudentID[]}) {
     }
     
     const studentInfo : TStudentID[] = await response.json()
-    
+  
     const url  = generateID(studentInfo)
     
     if(url) window.open(url);

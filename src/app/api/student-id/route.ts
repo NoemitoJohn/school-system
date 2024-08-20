@@ -6,12 +6,12 @@ import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: Request) { 
-  const body : {enrolled_id : number}= await request.json()
+  const body : {enrolled_id : string}= await request.json()
 
   try {
     const updateIdPaid = await db.update(enrolled_students).set({
       is_id_paid : true
-    }).where(eq(enrolled_students.enrolled_student_id, body.enrolled_id))
+    }).where(eq(enrolled_students.id, body.enrolled_id))
     revalidatePath('/student/print-id')
     return Response.json({student_enrolled_id : body.enrolled_id})
   } catch (error) {

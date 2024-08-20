@@ -7,6 +7,7 @@ import { grade_levels, sections } from '@/database/schema'
 import { asc, eq, sql } from 'drizzle-orm'
 import DataTable from '@/components/DataTable'
 import MarginContainer from '@/components/container/MarginContainer'
+import { PgUUID } from 'drizzle-orm/pg-core'
 
 export const revalidate = 0
 
@@ -39,7 +40,7 @@ const classes : TClassName[] = [
   'GRADE 12',
 ]
 export type TClasses = {
-  id : number
+  id : string
   section_name : string
   grade_level_name : string,
   school_year : string,
@@ -65,18 +66,22 @@ export default async function AddClass() {
     },
   ]
   
+  const getGradeLevels = await db.select({id : grade_levels.id, level_name : sql<string>`${grade_levels.level_name}`}).from(grade_levels).orderBy(asc(grade_levels.order_number))
+  
+  // console.log(getGradeLevels)
+  
   const getClasses = await db.select({
-    id : grade_levels.grade_level_id,
+    id : sql<string>`${grade_levels.id}`,
     section_name : sql<string>`${sections.section_name}`,
     grade_level_name : sql<string>`${grade_levels.level_name}`,
     school_year : sql<string>`${sections.school_year}`,
     created_by : sql<string>`${sections.created_by}`
-  }).from(grade_levels).innerJoin(sections, eq(grade_levels.grade_level_id, sections.grade_level_id)).orderBy(asc(grade_levels.level_name))
+  }).from(grade_levels).innerJoin(sections, sql`${grade_levels.id} = cast(${sections.grade_level_id} as TEXT)`).orderBy(asc(grade_levels.level_name))
 
   return (
    <>
     <MarginContainer>
-      <AddClassForm classes={classes} />
+      <AddClassForm classes={getGradeLevels} />
       <div className='mt-5'>
         <DataTable columns={columns} data={getClasses} />
       </div>

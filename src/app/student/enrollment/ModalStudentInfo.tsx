@@ -13,7 +13,7 @@ import useSWR, { Fetcher } from 'swr'
 
 type TModalStudentInfoProps = {
   isOpen : boolean 
-  id : number 
+  id : string 
   sections : TSection[]
   gradeLevel : TGradeLevel[] 
   handleOpenChange : (open : boolean) => void

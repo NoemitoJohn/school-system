@@ -11,3 +11,13 @@ export const getSchoolYear = () => {
   const school_year = `${currentYear}-${currentYear + 1}`
   return school_year
 }
+
+
+export const getObjectFormData = (form : FormData) => {
+  const obj : Record<string, unknown> = {}
+  
+  for (const element of form.keys()) {
+    obj[element] = form.get(element)
+  }
+  return obj
+}

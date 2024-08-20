@@ -8,8 +8,8 @@ import { sql } from "drizzle-orm";
 export async function getGradeLevels () {
   try {
     const getGradeLevels = await db.select({
-      id : sql<string>`${grade_levels.grade_level_id}`.as('id'),
-      level_name : sql<string>`grade_levels.level_name`.as('level_name')
+      id : sql<string>`${grade_levels.id}`.as('id'),
+      level_name : sql<string>`${grade_levels.level_name}`.as('level_name')
     }).from(grade_levels)
   
     const transformGradeLevel : TGradeLevel[] = getGradeLevels.map(v => {
