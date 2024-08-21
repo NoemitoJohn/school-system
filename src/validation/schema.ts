@@ -71,6 +71,15 @@ export const TeacherSchema = z.object({
   section: z.string().uuid()
 })
 
+export const TeacherFileSchema = z.object({
+  first_name : z.string().min(1, {message : 'required'}),
+  last_name: z.string().min(1, {message : 'required'}),
+  password: z.string().optional(),
+  email: z.string().email(),
+  phone: z.string().min(11, {message : `Must contain at least 11 character's`})
+})
+
+
 export const OPTeacherSchema = TeacherSchema.merge(z.object({password: z.string(), section: z.string().uuid()}).partial())
 
 
@@ -84,6 +93,7 @@ export type TOPTeacherSchema = z.infer<typeof OPTeacherSchema>
 
 export type TClassSchema = z.infer<typeof ClassSchema>
 
+export type TTeacherFileSchema = z.infer<typeof TeacherFileSchema>
 
 export type TStudentEnrollmentSchema = z.infer<typeof StudentEnrollmentSchema>
 

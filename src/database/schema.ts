@@ -165,6 +165,7 @@ export const users = pgTable('users', {
   remarks: text('remarks'),
 })
 
+export type TInsertUser = typeof users.$inferInsert;
 
 // export const students = sqliteTable('students', {
 //   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
