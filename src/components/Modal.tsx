@@ -2,7 +2,7 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { Dialog, DialogContent } from "./ui/dialog";
 
 
-interface ModalProps  extends DialogProps {
+export interface ModalProps extends DialogProps {
 
 }
 

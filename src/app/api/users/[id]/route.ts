@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   
   if(!parse.success) { return NextResponse.error() }
 
-  // delete previous saved image in supabase
+  //TODO: delete previous saved image in supabase
 
   const {data : teacherData} = parse
 
@@ -54,9 +54,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       last_name : teacherData.last_name,
       phone : teacherData.phone_number,
       email: teacherData.email,
-    }).where(eq(users.id, params.id)).returning({id : users.id})
+    }).where(eq(users.id, params.id))
+    .returning({
+      id: users.id,  
+      full_name : sql<string>`UPPER( CONCAT(${users.last_name}, ', ', ${users.first_name}) )`.as('full_name'),
+      status: sql<string>`CASE ${users.active} WHEN TRUE THEN 'ACTIVE' ELSE 'NOT ACTIVE' END`.as('status'),
+      email: users.email,
+      approval: sql<string>`CASE ${users.approval} WHEN TRUE THEN 'APPROVED' ELSE 'PENDING' END`.as('approval')
+    })
 
-    return NextResponse.json({status: 200, id : updateTeacherInfo.id})
+    return NextResponse.json({status: 200, data : updateTeacherInfo})
   } catch (error) {
     return NextResponse.error()
   }
