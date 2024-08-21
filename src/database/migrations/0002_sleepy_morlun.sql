@@ -1,1 +1,0 @@
-ALTER TABLE "students" ADD COLUMN "img_url" text;

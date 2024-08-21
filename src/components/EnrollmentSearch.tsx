@@ -16,14 +16,14 @@ import ModalStudentInfo from '@/app/student/enrollment/ModalStudentInfo';
 import ModalUploadXlxs from '@/app/student/enrollment/ModalUploadXlxs';
 
 export type TEnromentStudent = {
-  id: number
+  id: string
   lrn : string
   full_name : string
   grade_level : string 
   section : string 
   year_enrolled : string 
   is_paid_id? : boolean | null
-  enrolled_id? : number | null
+  enrolled_id? : string | null
 }
 
 type TSearch = { 
@@ -46,7 +46,7 @@ type TStudentEnrollmentAction = {
   action : 'INIT' | 'UPDATE' | 'ADD' | 'DELETE'
   students? : TEnromentStudent[]
   student? : TEnromentStudent
-  id? : number
+  id? : string
 }
 
 function studentReducer(state : TEnromentStudent[], action : TStudentEnrollmentAction) {
@@ -84,7 +84,7 @@ function studentReducer(state : TEnromentStudent[], action : TStudentEnrollmentA
 export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnromentStudent[], sections : TSection[], gradeLevel : TGradeLevel[]}) {
 
   const [state, dispatchStudentEnrollment] = useReducer(studentReducer, rows)
-  const [studentId, setStudentId] = useState<number>(0)
+  const [studentId, setStudentId] = useState<string>('')
   const [openStudentInfo, setOpenStudentInfo] = useState(false)
   const [openUploadXlsx, setOpenUploadXlsx] = useState(false)
 
@@ -94,7 +94,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
     dispatchStudentEnrollment({action : 'INIT', students : rows})
   }, [rows])
 
-  const handleEnrollButtonClick = async (id : number) => {
+  const handleEnrollButtonClick = async (id : string) => {
     setStudentId(id)
     setOpenStudentInfo(true)
   }
@@ -171,7 +171,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
         return toast.error('Something went wrong!')
       }
       
-      const response : {student_id : number} = await request.json()
+      const response : {student_id : string} = await request.json()
       
       dispatchStudentEnrollment({action : 'DELETE', id : response.student_id})
 

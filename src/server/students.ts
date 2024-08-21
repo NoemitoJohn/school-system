@@ -40,7 +40,7 @@ export async function getStudentEnrollment() {
     
     const getStudents = await db.select( // left join with student
     {
-      id : sql<number>`${students.student_id}`.as('id'),
+      id : sql<string>`${students.id}`.as('id'),
       lrn : sql<string>`${students.lrn}`.as('lrn'),
       first_name : sql<string>`${students.first_name}`.as('first_name'),
       last_name : sql<string>`${students.last_name}`.as('last_name'),
@@ -52,9 +52,9 @@ export async function getStudentEnrollment() {
       enrolled_year : sql<string>`COALESCE(${getLatestEnrollment.school_year}, '')`.as('enrolled_year'),
     })
     .from(students)
-    .leftJoin(getLatestEnrollment, eq(students.student_id, getLatestEnrollment.student_id))
-    .leftJoin(grade_levels, eq(getLatestEnrollment.grade_level_id, grade_levels.grade_level_id))
-    .leftJoin(sections, eq(sections.section_id, getLatestEnrollment.section_id))
+    .leftJoin(getLatestEnrollment, eq(students.id, getLatestEnrollment.student_id))
+    .leftJoin(grade_levels, eq(getLatestEnrollment.grade_level_id, grade_levels.id))
+    .leftJoin(sections, eq(sections.id, getLatestEnrollment.section_id))
     .where(
       or(
         lt(getLatestEnrollment.year, new Date().getFullYear()),
@@ -74,11 +74,11 @@ export async function getStudentEnrollment() {
         year_enrolled : s.enrolled_year
       }
     })
-
+    
     return formatStudent
 
   } catch (error) {
-    console.log(error)
+    console.log(81, error)
   }
 }
 
@@ -88,20 +88,20 @@ export async function searchStudentEnrollment(search : string) {
 
   try {
     const getStudents =  db.select({ // subquery
-      id : sql<number>`${students.student_id}`.as('id'),
+      id : sql<string>`${students.id}`.as('id'),
       lrn : sql<string>`${students.lrn}`.as('lrn'),
       first_name : students.first_name,
       last_name : students.last_name,
       middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
-      enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
+      enrollment_id : sql<string>`COALESCE(${enrolled_students.id}, '')`.as('enrollment_id'),
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
       enrolled_year : sql<string>`COALESCE(${enrolled_students.school_year}, '')`.as('enrolled_year'),
     })
     .from(students)
-    .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
-    .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
-    .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id))
+    .leftJoin(enrolled_students, eq(students.id, enrolled_students.student_id))
+    .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.id))
+    .leftJoin(sections, eq(sections.id, enrolled_students.section_id))
     .orderBy(asc(sections.school_year))
     .as('sq')
 
@@ -128,7 +128,7 @@ export async function searchStudentEnrollment(search : string) {
     }) 
     return formatSearchStudent
   } catch (error) {
-    console.log(error)
+    console.log(131, error)
   }
   
 }
@@ -137,35 +137,35 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
    
   let isInsertAction = false
   try {
-    let enrolmentId = 0
+    let enrolmentId = ''
     await db.transaction(async (tx) => {
       try {
         const [enrolled] = await tx.select({
-          id : sql<number>`COALESCE(${enrolled_students.enrolled_student_id}, 0)`.as('id')
-        }).from(enrolled_students).where(and(eq(enrolled_students.student_id, Number(data.id)), eq(enrolled_students.school_year, data.school_year)))
+          id : sql<string>`COALESCE(${enrolled_students.id}, 0)`.as('id')
+        }).from(enrolled_students).where(and(eq(enrolled_students.student_id, data.id), eq(enrolled_students.school_year, data.school_year)))
 
         if(enrolled) {
           const updateEnrolment = await tx.update(enrolled_students).set({
-            grade_level_id : +data.grade_level,
-            section_id : +data.section,
-          }).where(eq(enrolled_students.enrolled_student_id, enrolled.id))
+            grade_level_id : data.grade_level,
+            section_id : data.section,
+          }).where(eq(enrolled_students.id, enrolled.id))
 
           enrolmentId = enrolled.id
 
         } else {
           const [insert] = await tx.insert(enrolled_students).values({
-            grade_level_id : +data.grade_level,
-            section_id : +data.section,
-            student_id : +data.id,
+            grade_level_id : data.grade_level,
+            section_id : data.section,
+            student_id : data.id,
             school_year : data.school_year
           }).returning()
           
-          enrolmentId  = insert.enrolled_student_id
+          enrolmentId  = insert.id
           isInsertAction = true
         }
         await tx.update(students).set({
           enrollment_id : enrolmentId
-        }).where(eq(students.student_id, +data.id))
+        }).where(eq(students.id, data.id))
         
       } catch (error) {
         console.log(error)
@@ -174,7 +174,7 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
     })
 
     const [getStudent] = await db.select({
-      id : students.student_id,
+      id : students.id,
       first_name : students.first_name,
       last_name : students.last_name,
       middle_name : students.middle_name,
@@ -184,10 +184,10 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
       section_name : sql<string>`${sections.section_name}`,
     })
     .from(students)
-    .innerJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
-    .innerJoin(sections, eq(sections.section_id, enrolled_students.section_id))
-    .innerJoin(grade_levels, eq(grade_levels.grade_level_id, enrolled_students.grade_level_id))
-    .where(eq(enrolled_students.enrolled_student_id, enrolmentId))
+    .innerJoin(enrolled_students, eq(students.id, enrolled_students.student_id))
+    .innerJoin(sections, eq(sections.id, enrolled_students.section_id))
+    .innerJoin(grade_levels, eq(grade_levels.id, enrolled_students.grade_level_id))
+    .where(eq(enrolled_students.id, enrolmentId))
     
     const formatStudent : TEnromentStudent = {
       full_name : `${getStudent.last_name}, ${getStudent.first_name} .${getStudent.middle_name?.at(0)}`,
@@ -201,7 +201,7 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
     return formatStudent
     
   } catch (error) {
-
+    console.log(204, error)
   }
 
   if(isInsertAction) 

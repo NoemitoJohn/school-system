@@ -67,13 +67,13 @@ async function getStudentInfoWithId(ids : string[])  {
   try {
     const getStudentInfo = await db.select(
     {
-      id : sql<number>`${students.student_id}`.as('id'),
+      id : sql<string>`${students.id}`.as('id'),
       lrn : sql<string>`${students.lrn}`.as('lrn'),
       first_name : sql<string>`${students.first_name}`.as('first_name'),
       last_name : sql<string>`${students.last_name}`.as('last_name'),
       middle_name : sql<string>`${students.middle_name}`.as('middle_name'),
       // enrollment_id : sql<string>`COALESCE(${enrolled_students.enrolled_student_id}, -1)`.as('enrollment_id'),
-      enrolled_id :  sql<number>`enrolled_students.enrolled_student_id`.as('enrolled_id'),
+      enrolled_id :  sql<string>`${enrolled_students.id}`.as('enrolled_id'),
       grade_level_name : sql<string>`COALESCE(${grade_levels.level_name}, '')`.as('grade_level_name'),
       section_name : sql<string>`COALESCE(${sections.section_name}, '')`.as('section_name'),
       enrolled_year : sql<string>`COALESCE(${enrolled_students.school_year}, '')`.as('enrolled_year'),
@@ -84,10 +84,11 @@ async function getStudentInfoWithId(ids : string[])  {
 
     })
     .from(students)
-    .leftJoin(enrolled_students, eq(students.student_id, enrolled_students.student_id))
-    .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.grade_level_id))
-    .leftJoin(sections, eq(sections.section_id, enrolled_students.section_id))
-    .orderBy(asc(sections.school_year)).where(sql`${enrolled_students.enrolled_student_id} in ${ids}`)
+    .leftJoin(enrolled_students, eq(students.id, enrolled_students.student_id))
+    .leftJoin(grade_levels, eq(enrolled_students.grade_level_id, grade_levels.id))
+    .leftJoin(sections, eq(sections.id, enrolled_students.section_id))
+    .orderBy(asc(sections.school_year)).where(sql`${enrolled_students.id} in ${ids}`)
+    
     return getStudentInfo
     
   } catch (error) {

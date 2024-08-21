@@ -92,6 +92,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     getCoreRowModel : getCoreRowModel(),
     enableMultiRowSelection: false,
   })
+
   const {
     register,  
     handleSubmit,
@@ -103,7 +104,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     setIsOpen(true)
   }
 
-  const handlePaymentSubmit : SubmitHandler<{enrolled_id : number}> = async (data) => {
+  const handlePaymentSubmit : SubmitHandler<{enrolled_id : string}> = async (data) => {
     const request =  await trigger(JSON.stringify(data))
     
     if(!request.ok){ 
@@ -118,6 +119,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     router.refresh()
     setIsOpen(false)
   }
+
   const handleSearchSubmit : SubmitHandler<{search : string}> = async (data) => {
     const param = new URLSearchParams(data).toString()
     const request = await fetch(`/api/enrolled?${param}`)  
@@ -129,6 +131,7 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
     
 
   }
+  
   const renderModal = () => {
     if(isOpen && student) {
       return (
@@ -157,13 +160,13 @@ export default function EnrolledStudent({rows} : {rows : TEnromentStudent[]}) {
   )
 }
 
-const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit, isLoading} : {open : boolean, student : TEnromentStudent,handleOpenChange : (open : boolean) => void, handleOnPaymentSubmit : SubmitHandler<{enrolled_id : number}> , isLoading : boolean} ) => {
+const PaymentIDModal = ({open, student, handleOpenChange, handleOnPaymentSubmit, isLoading} : {open : boolean, student : TEnromentStudent,handleOpenChange : (open : boolean) => void, handleOnPaymentSubmit : SubmitHandler<{enrolled_id : string}> , isLoading : boolean} ) => {
 
   const {
     register,
     handleSubmit,
     formState : {errors}
-  } = useForm<{enrolled_id : number }>({
+  } = useForm<{enrolled_id : string }>({
     defaultValues : {
       enrolled_id : student.enrolled_id!
     }

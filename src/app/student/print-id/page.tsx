@@ -6,7 +6,7 @@ import MarginContainer from "@/components/container/MarginContainer"
 export const revalidate = 0
 
 export type TStudentID = {
-  id: number
+  id: string
   lrn : string
   full_name : string
   grade_level : string 
@@ -14,7 +14,7 @@ export type TStudentID = {
   year_enrolled : string 
   is_paid_id : boolean
   parent_number : string
-  enrolled_id : number
+  enrolled_id : string
   img_url?: string
   qr? : string
 }
@@ -22,7 +22,7 @@ export type TStudentID = {
 
 export default async function StudentPrintId() {
   const enrolledStudentPaidId = await getEnrolledStudentWithPaidId()
-  
+  console.log(enrolledStudentPaidId)
   return (
     <div>
       <MarginContainer>

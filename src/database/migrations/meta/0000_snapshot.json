@@ -1,40 +1,114 @@
 {
-  "id": "d1522399-bf3b-43ed-b26a-df65d0375d98",
+  "id": "986f78eb-9eb0-4424-82c7-ff8d81b9e4d0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.enrolled_students": {
-      "name": "enrolled_students",
+    "public.class": {
+      "name": "class",
       "schema": "",
       "columns": {
-        "enrolled_student_id": {
-          "name": "enrolled_student_id",
-          "type": "serial",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "student_id": {
-          "name": "student_id",
-          "type": "integer",
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "grade_level_id": {
-          "name": "grade_level_id",
-          "type": "integer",
+        "created_date": {
+          "name": "created_date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": "now()"
         },
         "school_id": {
           "name": "school_id",
-          "type": "integer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_year": {
+          "name": "school_year",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false
         },
         "section_id": {
           "name": "section_id",
-          "type": "integer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_date": {
+          "name": "updated_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "imported": {
+          "name": "imported",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.enrolled_students": {
+      "name": "enrolled_students",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "student_id": {
+          "name": "student_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "grade_level_id": {
+          "name": "grade_level_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "school_id": {
+          "name": "school_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_id_paid": {
+          "name": "is_id_paid",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -54,11 +128,12 @@
       "name": "grade_levels",
       "schema": "",
       "columns": {
-        "grade_level_id": {
-          "name": "grade_level_id",
-          "type": "serial",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "description": {
           "name": "description",
@@ -74,13 +149,13 @@
         },
         "id_template": {
           "name": "id_template",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "level_name": {
           "name": "level_name",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -92,7 +167,291 @@
         },
         "school_id": {
           "name": "school_id",
-          "type": "integer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "elementary": {
+          "name": "elementary",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jhs": {
+          "name": "jhs",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shs": {
+          "name": "shs",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.roles": {
+      "name": "roles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.school_districts": {
+      "name": "school_districts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "division_id": {
+          "name": "division_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.school_divisions": {
+      "name": "school_divisions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "rigion_id": {
+          "name": "rigion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.school_regions": {
+      "name": "school_regions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.schools": {
+      "name": "schools",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_date": {
+          "name": "created_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "email_address": {
+          "name": "email_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_template_path": {
+          "name": "id_template_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logo_path": {
+          "name": "logo_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_address": {
+          "name": "school_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_contact": {
+          "name": "school_contact",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_name": {
+          "name": "school_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_principal": {
+          "name": "school_principal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_short_name": {
+          "name": "school_short_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_type": {
+          "name": "school_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "signature_path": {
+          "name": "signature_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "signature_url": {
+          "name": "signature_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_date": {
+          "name": "updated_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "website": {
+          "name": "website",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_region_id": {
+          "name": "school_region_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_division_id": {
+          "name": "school_division_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_district_id": {
+          "name": "school_district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_year": {
+          "name": "school_year",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -106,21 +465,22 @@
       "name": "sections",
       "schema": "",
       "columns": {
-        "section_id": {
-          "name": "section_id",
-          "type": "serial",
+        "id": {
+          "name": "id",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "course_tvl": {
           "name": "course_tvl",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "created_by": {
           "name": "created_by",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -129,41 +489,41 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "grade_level_id": {
-          "name": "grade_level_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "default": "now()"
         },
         "school_id": {
           "name": "school_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "school_year": {
-          "name": "school_year",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "section_name": {
           "name": "section_name",
-          "type": "varchar(50)",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_year": {
+          "name": "school_year",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grade_level_id": {
+          "name": "grade_level_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "track_and_strand": {
           "name": "track_and_strand",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "updated_by": {
           "name": "updated_by",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -172,7 +532,25 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "now()"
+        },
+        "adviser_id": {
+          "name": "adviser_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "semester": {
+          "name": "semester",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imported": {
+          "name": "imported",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -186,9 +564,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "active": {
           "name": "active",
@@ -210,25 +589,25 @@
         },
         "city_municipality": {
           "name": "city_municipality",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "ethnic_group": {
           "name": "ethnic_group",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "father_name": {
           "name": "father_name",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "mother_name": {
           "name": "mother_name",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -258,67 +637,61 @@
         },
         "full_name": {
           "name": "full_name",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "gender": {
           "name": "gender",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "grade_level": {
-          "name": "grade_level",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "guardian_name": {
           "name": "guardian_name",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "guardian_relationship": {
           "name": "guardian_relationship",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "learning_modality": {
           "name": "learning_modality",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "lrn": {
           "name": "lrn",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "mother_tongue": {
           "name": "mother_tongue",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "parent_mobile_number": {
           "name": "parent_mobile_number",
-          "type": "varchar(20)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "province": {
           "name": "province",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "religion": {
           "name": "religion",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -330,25 +703,209 @@
         },
         "school_id": {
           "name": "school_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "section_id": {
           "name": "section_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "street_address": {
           "name": "street_address",
-          "type": "varchar",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "enrollment_id": {
           "name": "enrollment_id",
-          "type": "integer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "piture_path": {
+          "name": "piture_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "picture_url": {
+          "name": "picture_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_date": {
+          "name": "created_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_date": {
+          "name": "updated_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qrcode": {
+          "name": "qrcode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked": {
+          "name": "locked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_successful_login": {
+          "name": "last_successful_login",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_date": {
+          "name": "created_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_date": {
+          "name": "updated_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval": {
+          "name": "approval",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "school_id": {
+          "name": "school_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reference_number": {
+          "name": "reference_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "region_id": {
+          "name": "region_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "division_id": {
+          "name": "division_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "district_id": {
+          "name": "district_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }

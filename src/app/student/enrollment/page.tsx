@@ -11,7 +11,7 @@ export default async function StudentEnrollment() {
   const students = await getStudentEnrollment()
   const sections = await getSections()
   const gradeLevels = await getGradeLevels()
-
+  
   if(!sections || !students || !gradeLevels){
     return (
       <div className='text-center text-red-400'>Something Went Wrong Please Try Again</div>

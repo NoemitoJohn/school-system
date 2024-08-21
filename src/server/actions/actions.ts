@@ -1,9 +1,9 @@
 'use server'
 import { db } from "@/database/db"
-import { grade_levels, sections, students } from "@/database/schema"
+import { classes, grade_levels, sections, students } from "@/database/schema"
 import { supabase } from "@/database/supabase"
-import { StudentSchema, TClassSchema, TStudent } from "@/validation/schema"
-import { eq } from "drizzle-orm"
+import { ClassSchema, StudentSchema, TClassSchema, TStudent } from "@/validation/schema"
+import { eq, param } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { nanoid } from 'nanoid'
 import QRCode from 'qrcode';
@@ -70,38 +70,35 @@ export const addStudent =  async (data : TStudent) => {
 
 export const addClass  = async (data : TClassSchema) => {
   try {
+    // return console.log(data)
+    const parse =  ClassSchema.safeParse(data)
+
+    if(!parse.success) throw Error(parse.error.message);
+    // console.log(parse.data)
+    const { data : value } = parse
     await db.transaction( async (tx) => {
-      let gradeLevelId = 0;
+      
       try {
-        const [getGradeLevel] = await tx.select({
-          id : grade_levels.grade_level_id
-        }).from(grade_levels).where(eq(grade_levels.level_name, data.grade_level_name))
-        
-        gradeLevelId =  getGradeLevel?.id
-        
-        if(!getGradeLevel) {
-          // insert grade level 
-          const [insertGradeLevel] = await tx.insert(grade_levels).values({
-            level_name : data.grade_level_name
-          }).returning()
+        const [insertedSection] = await tx.insert(sections).values({
+          grade_level_id : value.grade_level_name,
+          section_name : value.section_name,
+          school_year: value.school_year,
+        }).returning()
 
-          gradeLevelId = insertGradeLevel.grade_level_id
-        }
-        console.log(gradeLevelId)
-
-        const section = await tx.insert(sections).values({
-          grade_level_id : gradeLevelId,
-          school_year : data.school_year,
-          section_name : data.section_name,
-          // created_by : data.created_by,
+        const [insertedClass] = await tx.insert(classes).values({
+          imported : false,
+          school_year : value.school_year,
+          section_id : insertedSection.id,
         })
+        
+
       } catch (error) {
         console.log(error)
         await tx.rollback()
       }
     })
   } catch (error) {
-    
+    // throw new Error(error)
   }
   revalidatePath('/class/add')
 }
