@@ -1,4 +1,4 @@
-import { TxlsxStudent } from "@/app/student/enrollment/ModalUploadXlxs";
+import { TxlsxStudent } from "@/app/(main)/student/enrollment/ModalUploadXlxs";
 import { db } from "@/database/db";
 import { students } from "@/database/schema";
 import { revalidatePath } from "next/cache";

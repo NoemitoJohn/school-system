@@ -7,7 +7,7 @@ import { TTeacher } from "./page"
 import { ColumnDef, getCoreRowModel } from "@tanstack/react-table"
 import DataTableCustomHook from "@/components/DataTableCustomHook"
 import { TSection } from "@/components/EnrollmentSearch"
-import AddTeacherModal from "@/app/faculty/teacher/AddTeacherModal"
+import AddTeacherModal from "@/app/(main)/faculty/teacher/AddTeacherModal"
 import {  useReducer, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { getObjectKeys, TeacherFileSchema, TTeacherFileSchema, TTeacherSchema } from "@/validation/schema"
@@ -121,7 +121,7 @@ export default function TeacherComponent({ classes, teachers: data }: { classes:
   const { trigger: putTeacher } = useSWRMutation('/api/users/', updateTeacherInfoFetcher)
   const { trigger: searchTeacher, isMutating: loadingSearch } = useSWRMutation('/api/users/', searchTeacherFetcher)
   const { trigger: deleteTeacher, isMutating: loadingDelete } = useSWRMutation('/api/users/', deteleTeacherFetcher)
-  const { trigger: uploadFile, isMutating: loadingFileUpload } = useSWRMutation('/api/users/csv', uploadTeacherFileFetcher)
+  const { trigger: uploadFile } = useSWRMutation('/api/users/csv', uploadTeacherFileFetcher)
 
 
   const [teachers, dispatchTeachers] = useReducer(reducer, data)
@@ -199,9 +199,11 @@ export default function TeacherComponent({ classes, teachers: data }: { classes:
     } catch (err) {
       if(err instanceof ParseError){
        const error = err.error()
-       for (const err of error.errors!) {
-          toast.error(`${err.message} column (${err.path}) at row ${error.row}`, { duration: 5000 })
-        }
+       if(error.errors){
+         for (const err of error.errors) {
+            toast.error(`${err.message} column (${err.path}) at row ${error.row}`, { duration: 5000 })
+          }
+       }
         return
       }
       

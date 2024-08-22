@@ -4,13 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { nanoid } from 'nanoid';
 import React from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
-import { Label } from '../../../components/ui/label';
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
+import { Label } from '../../../../components/ui/label';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 import { KeyRound } from 'lucide-react';
-import Dropdown from '../../../components/Dropdown';
-import { TSection } from '../../../components/EnrollmentSearch';
+import Dropdown from '../../../../components/Dropdown';
+import { TSection } from '../../../../components/EnrollmentSearch';
 
 type TTeacherModalProps<> =  {
   classes : TSection[]

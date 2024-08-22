@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.31.2",
+    "jose": "^5.7.0",
     "jspdf": "^2.5.1",
     "lucide-react": "^0.396.0",
     "nanoid": "^5.0.7",
