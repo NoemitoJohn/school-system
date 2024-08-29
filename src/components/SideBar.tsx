@@ -45,6 +45,7 @@ export default function SideBar() {
                 <MenuItem active={path === '/student/add'} component={<Link href='/student/add' />}> Add Student </MenuItem>
                 <MenuItem  active={path === '/student/enrollment'} component={<Link href='/student/enrollment'/>} > Enrollment</MenuItem>
                 <MenuItem active={path === '/student/endrolled'} component={<Link href='/student/endrolled' />} > Endrolled Student</MenuItem>
+                <MenuItem active={path === '/student/attendance'} component={<Link href='/student/attendance' />} >Attendance</MenuItem>
                 <MenuItem active={path === '/student/print-id'} component={<Link href='/student/print-id' />} > Print ID</MenuItem>
               </SubMenu>
             </SMenu>

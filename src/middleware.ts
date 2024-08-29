@@ -13,7 +13,7 @@ export default async function middleware(req: NextRequest) {
   const user = await decrypt(cookie)
   
   const isPublicRoute = publicRoutes.includes(path)
-
+  
   if(!user && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', req.nextUrl))
   }
@@ -29,7 +29,6 @@ export default async function middleware(req: NextRequest) {
   if(user && isPublicRoute) {
     return NextResponse.redirect(new URL('/', req.nextUrl))
   }
-
 
   return NextResponse.next()
 }

@@ -95,6 +95,13 @@ export const SignUpSchema = z.object({
   path: ["confirm"]
 })
 
+export const StudentAttendanceSchema =  z.object({
+  student_id: z.string().uuid(),
+  student_name: z.string(),
+  section_id: z.string().uuid(),
+  is_time_out: z.string().transform((val) => Number(val) === 1 )
+})
+
 export const OPTeacherSchema = TeacherSchema.merge(z.object({password: z.string(), section: z.string().uuid()}).partial())
 
 export const getObjectKeys  = <T extends Object>(schema : T) => {
@@ -102,12 +109,11 @@ export const getObjectKeys  = <T extends Object>(schema : T) => {
   return keys
 }
 
-
 export type TSignUpSchema = z.infer<typeof SignUpSchema>
 export type TLoginSchema = z.infer<typeof LoginSchema>
 export type TTeacherSchema = z.infer<typeof TeacherSchema>
 export type TOPTeacherSchema = z.infer<typeof OPTeacherSchema>
-
+export type TStudentAttendanceSchema = z.infer<typeof StudentAttendanceSchema>
 export type TClassSchema = z.infer<typeof ClassSchema>
 
 export type TTeacherFileSchema = z.infer<typeof TeacherFileSchema>

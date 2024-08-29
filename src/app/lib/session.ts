@@ -5,11 +5,11 @@ import { cookies } from 'next/headers'
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
-export async function encrypt(payload : {id : string, role : string, approve : boolean}) {
+export async function encrypt(payload : {id : string, role : string, approve : boolean}, expiration: number | string) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(expiration)
     .sign(encodedKey)
 }
 

@@ -9,6 +9,7 @@ import Link from 'next/link'
 import React from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
 
 
 export default function Login() {
@@ -16,7 +17,7 @@ export default function Login() {
   const {handleSubmit, register, formState : {isSubmitting}} = useForm<TLoginSchema>({
     resolver: zodResolver(LoginSchema)
   })
-
+  const router = useRouter()
   const handleLoginSubmit : SubmitHandler<TLoginSchema> = async (formData) => {
     
     const request = await fetch('/api/auth/login', {
@@ -28,10 +29,9 @@ export default function Login() {
     
     const response = await request.json()
 
-
     if(!response.success) { return toast.error(response.message) }
 
-    toast.success('Yaaaaay yawa!')
+    router.push('/')
   }
 
   return (

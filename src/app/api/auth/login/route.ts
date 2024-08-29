@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   
   if(!user) { return NextResponse.json({success: false, message: 'Incorect Credentials'})}
   
-  const valid =  await bcrypt.compare(data.password, user.password!)
+  const valid =  await bcrypt.compare(data.password, user.password)
   
   if(!valid) { return NextResponse.json({success: false, message: 'Incorect Credentials'}) }
   
@@ -36,9 +36,13 @@ export async function POST(request: NextRequest) {
     approve: user.approval
   }
   
-  const token = await encrypt(proneUser)
-  
-  createSession(token)
+  if(!proneUser.approve){
+    const token = await encrypt(proneUser, '1m')
+    createSession(token)
+  }else{
+    const token = await encrypt(proneUser, '1d')
+    createSession(token)    
+  }
 
   return NextResponse.json({success: true})
 }
