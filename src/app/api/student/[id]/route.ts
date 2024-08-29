@@ -6,7 +6,6 @@ import { eq, sql } from "drizzle-orm"
 
 export async function GET(request: Request, {params} : {params  : {id : string}}) {
   const {id} = params
-  console.log(9, id)
   try {
     let getStudents =  db.select({
       id : students.id,

@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import { TStudentsAttendance } from './page'
 import { Input } from '@/components/ui/input'
+import ScannerModal from './ScannerModal'
 
 
 export default function Attendance({students} : {students : TStudentsAttendance}) {
@@ -19,9 +20,8 @@ export default function Attendance({students} : {students : TStudentsAttendance}
   const [openPopover, setOpenPopOver] = useState(false)
   const [openManualModal, setManualModal] = useState(false)
   const [openScannerModal, setOpenScannerModal] = useState(false)
-  const scannerInputRef = useRef<HTMLInputElement>(null)
+ 
   const popoverTriggerRef = useRef<HTMLButtonElement>(null)
-
 
   const {
     control,
@@ -36,7 +36,7 @@ export default function Attendance({students} : {students : TStudentsAttendance}
   const handleStudentAttendanceSubmit : SubmitHandler<TStudentAttendanceSchema> = (formdata) => {
 
   }
-
+  //code 127873170125
   return (
     <div className='mt-3'>
       <div className='flex justify-end gap-2'>
@@ -114,28 +114,7 @@ export default function Attendance({students} : {students : TStudentsAttendance}
         </Modal>
         {/* Scanner modal */}
         {openScannerModal &&
-          <Modal open={openScannerModal} onOpenChange={setOpenScannerModal}>
-            <DialogHeader>
-              <DialogTitle className='text-base'>
-                Student Attendance
-              </DialogTitle>
-              <DialogDescription>Scan Qr Code</DialogDescription>
-            </DialogHeader>
-            <div className='grid grid-cols-2 grid-rows-4 gap-3'>
-              <div className='w-full h-[200px] bg-slate-500 row-span-4'></div>
-              <p className='text-ellipsis'>Noemito John Lacanaria</p>
-              <p>Noemito John Lacanaria</p>
-              <p>Noemito John Lacanaria</p>
-              <p>Noemito John Lacanaria</p>
-            </div>
-            {/* Scanner form */}
-            <form>
-              <div className='flex gap-2'>
-                <Input ref={scannerInputRef} placeholder='Scanner Code'/>
-                <Button size='sm' type='submit'><ScanBarcode size={18}/></Button> 
-              </div>
-            </form>
-          </Modal>
+          <ScannerModal open={openScannerModal} onOpenChange={setOpenScannerModal} />
         }
       </div>
     </div>
