@@ -10,7 +10,7 @@ import { StudentSchema, TStudent } from "@/validation/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addStudent } from "@/server/actions/actions";
 import Dropdown from "./Dropdown";
-import { TBarangay, TCity, TProvince } from "@/app/student/add/page";
+import { TBarangay, TCity, TProvince } from "@/app/(main)/student/add/page";
 import { ChangeEvent, useState } from "react";
 import useSWRMutation from "swr/mutation";
 import { useRouter } from "next/navigation";

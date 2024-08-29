@@ -12,8 +12,8 @@ import { useRouter } from 'next/navigation';
 import useDataTable from '@/hooks/useDataTable';
 import DataTableCustomHook from './DataTableCustomHook';
 
-import ModalStudentInfo from '@/app/student/enrollment/ModalStudentInfo';
-import ModalUploadXlxs from '@/app/student/enrollment/ModalUploadXlxs';
+import ModalStudentInfo from '@/app/(main)/student/enrollment/ModalStudentInfo';
+import ModalUploadXlxs from '@/app/(main)/student/enrollment/ModalUploadXlxs';
 
 export type TEnromentStudent = {
   id: string

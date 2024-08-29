@@ -1,4 +1,4 @@
-import { TStudentID } from "@/app/student/print-id/page"
+import { TStudentID } from "@/app/(main)/student/print-id/page"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
 import { supabase } from "@/database/supabase"

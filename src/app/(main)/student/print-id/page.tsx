@@ -22,17 +22,13 @@ export type TStudentID = {
 
 export default async function StudentPrintId() {
   const enrolledStudentPaidId = await getEnrolledStudentWithPaidId()
-  console.log(enrolledStudentPaidId)
   return (
     <div>
       <MarginContainer>
-
-      <div className="uppercase font-semibold">Print ID</div>
-      {/* {enrolledStudentPaidId && (  */}
-      <div className="mt-3"> 
-        <PrintID rows={enrolledStudentPaidId!} />
-      </div>
-      {/* )} */}
+        <div className="uppercase font-semibold">Print ID</div>
+        <div className="mt-3"> 
+          <PrintID rows={enrolledStudentPaidId!} />
+        </div>
       </MarginContainer>
       
     </div>

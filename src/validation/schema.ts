@@ -1,5 +1,4 @@
-// import { classes } from "@/app/class/add/page";
-import { string, z } from "zod";
+import {  z } from "zod";
 
 const AddressSchema = z.object({
   province : z.string().trim(),
@@ -57,6 +56,11 @@ export const ClassSchema = z.object( {
   // created_by : z.string().trim().min(3)
 })
 
+export const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
+})
+
 export const TeacherSchema = z.object({
   id: z.string().optional(),
   profile: z.custom<FileList | File>().transform((t) => { 
@@ -79,18 +83,37 @@ export const TeacherFileSchema = z.object({
   phone: z.string().min(11, {message : `Must contain at least 11 character's`})
 })
 
+export const SignUpSchema = z.object({
+  first_name: z.string().min(1).trim(),
+  last_name: z.string().min(1).trim(),
+  email: z.string().email(),
+  phone_number: z.string().min(10).trim(),
+  password: z.string().min(8).trim(),
+  confirm: z.string().min(8).trim()
+}).refine((data) => data.password === data.confirm,{
+  message: "Passwords don't match",
+  path: ["confirm"]
+})
+
+export const StudentAttendanceSchema =  z.object({
+  student_id: z.string().uuid(),
+  student_name: z.string(),
+  section_id: z.string().uuid(),
+  is_time_out: z.string().transform((val) => Number(val) === 1 )
+})
 
 export const OPTeacherSchema = TeacherSchema.merge(z.object({password: z.string(), section: z.string().uuid()}).partial())
-
 
 export const getObjectKeys  = <T extends Object>(schema : T) => {
   const keys = Object.keys(schema) as Array<keyof T>
   return keys
 }
 
+export type TSignUpSchema = z.infer<typeof SignUpSchema>
+export type TLoginSchema = z.infer<typeof LoginSchema>
 export type TTeacherSchema = z.infer<typeof TeacherSchema>
 export type TOPTeacherSchema = z.infer<typeof OPTeacherSchema>
-
+export type TStudentAttendanceSchema = z.infer<typeof StudentAttendanceSchema>
 export type TClassSchema = z.infer<typeof ClassSchema>
 
 export type TTeacherFileSchema = z.infer<typeof TeacherFileSchema>
