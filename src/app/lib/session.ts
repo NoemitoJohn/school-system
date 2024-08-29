@@ -15,12 +15,14 @@ export async function encrypt(payload : {id : string, role : string, approve : b
 
 export async function decrypt(token: string | undefined = '') {
   try {
+
     const { payload } = await jwtVerify(token, encodedKey, {
       algorithms: ['HS256'],
     })
     return payload
   } catch (error) {
     console.log('Failed to verify session')
+    console.log(error)
   }
 }
 
