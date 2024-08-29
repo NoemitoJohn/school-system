@@ -1,8 +1,10 @@
+
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
 import { StudentEnrollmentSchema, TStudentEnrollmentSchema } from "@/validation/schema"
 import { and, asc, eq, ne, sql } from "drizzle-orm"
+import { revalidatePath } from "next/cache"
 
 export async function POST(request: Request) {
   const body : TStudentEnrollmentSchema = await request.json()
@@ -38,6 +40,7 @@ export async function POST(request: Request) {
   })
 
   if(studentId) {
+    revalidatePath('/student/endrolled')
     return Response.json({student_id : studentId})
   }
   return Response.error()

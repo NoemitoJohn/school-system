@@ -126,7 +126,6 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       cell : ({row}) => {
         const original = row.original
         return(
-          // <EnrollButton id={original.id} />
           <Button variant='link' size='sm' className='h-0' onClick={() => handleEnrollButtonClick(original.id)}>
             Enroll
           </Button>
@@ -156,7 +155,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
       // reset()
     } catch (error) {
       // toast  
-      alert(error)
+      // alert(error)
     }
   } 
   

@@ -104,11 +104,16 @@ export const StudentAttendanceSchema =  z.object({
 
 export const OPTeacherSchema = TeacherSchema.merge(z.object({password: z.string(), section: z.string().uuid()}).partial())
 
+export const ScannerCodeSchema = z.object({
+  code:  z.string().min(5)
+})
+
 export const getObjectKeys  = <T extends Object>(schema : T) => {
   const keys = Object.keys(schema) as Array<keyof T>
   return keys
 }
 
+export type TScannerCodeSchema = z.infer<typeof ScannerCodeSchema>
 export type TSignUpSchema = z.infer<typeof SignUpSchema>
 export type TLoginSchema = z.infer<typeof LoginSchema>
 export type TTeacherSchema = z.infer<typeof TeacherSchema>
