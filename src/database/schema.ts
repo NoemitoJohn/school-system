@@ -167,7 +167,7 @@ export const users = pgTable('users', {
 
 export const class_attendance = pgTable('class_attendance', {
   id: text('id').primaryKey().default(sql`gen_random_uuid()`),
-  attendance_date : date('attendance_date').default(sql`NOW()`),
+  attendance_date : date('attendance_date'),
   created_by: text('created_by'),
   created_date: timestamp('created_date', {withTimezone: false}).defaultNow(),
   is_time_out: boolean('is_time_out'),
