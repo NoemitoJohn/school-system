@@ -105,7 +105,8 @@ export const StudentAttendanceSchema =  z.object({
 export const OPTeacherSchema = TeacherSchema.merge(z.object({password: z.string(), section: z.string().uuid()}).partial())
 
 export const ScannerCodeSchema = z.object({
-  code:  z.string().min(5)
+  code:  z.string().min(5),
+  date: z.date(),
 })
 
 export const getObjectKeys  = <T extends Object>(schema : T) => {
