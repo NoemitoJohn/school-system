@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 type TAttendanceHistory = {
   is_time_out: boolean; 
   time_in: string;
-  time_out: string
+  time_out: string;
+  date_time_stamp: string;
 }
 
 type TScanerResponse = {
@@ -59,7 +60,7 @@ export default function Scanner() {
       
       const timeOut = response.data.history.filter((v) => v.is_time_out)
       const timeIn = response.data.history.filter((v) => !v.is_time_out)
-      console.log(response.data)
+
       setHistoryTimeIn(timeIn)
       setHistoryTimeOut(timeOut)
       setStudentInfo(response.data)
@@ -115,7 +116,7 @@ export default function Scanner() {
               <p className='text-2xl font-sans text-center text-slate-500  font-extrabold uppercase'>TIME IN</p>
               {historyTimeIn && historyTimeIn.map(v => (
                 <p key={v.time_in} className='text-2xl font-sans text-center text-slate-900 font-extrabold uppercase'>
-                  {v.time_in}
+                  {new Intl.DateTimeFormat('en-US', { timeStyle: 'short'}).format(new Date(v.date_time_stamp))}
                 </p>
               ))}
             </div>
@@ -123,7 +124,7 @@ export default function Scanner() {
               <p className='text-2xl font-sans text-center text-slate-500  font-extrabold uppercase'>TIME OUT</p>
               {historyTimeOut && historyTimeOut.map(v => (
                 <p key={v.time_out} className='text-2xl font-sans text-center text-slate-900 font-extrabold uppercase'>
-                  {v.time_out}
+                  {new Intl.DateTimeFormat('en-US', { timeStyle: 'short'}).format(new Date(v.date_time_stamp))}
                 </p>
               ))}
             </div>    

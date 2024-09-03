@@ -73,6 +73,7 @@ export async function POST(request: Request) { // 127873170125
 
       const attendanceHistory = await db.select({
         is_time_out : class_attendance.is_time_out,
+        date_time_stamp: class_attendance.created_date,
         time_in: class_attendance.time_in,
         time_out: class_attendance.time_out,
       }).from(class_attendance).where(
@@ -105,7 +106,7 @@ export async function POST(request: Request) { // 127873170125
         }).returning( {
           is_time_out: class_attendance.is_time_out, 
           time_in: class_attendance.time_in, 
-          current: class_attendance.created_date,
+          date_time_stamp: class_attendance.created_date,
           time_out: class_attendance.time_out
         })
         
@@ -137,7 +138,7 @@ export async function POST(request: Request) { // 127873170125
         }).returning( {
           is_time_out: class_attendance.is_time_out, 
           time_in: class_attendance.time_in, 
-          current: class_attendance.created_date,
+          date_time_stamp: class_attendance.created_date,
           time_out: class_attendance.time_out
         })
         
@@ -158,7 +159,7 @@ export async function POST(request: Request) { // 127873170125
         }).returning({
           is_time_out: class_attendance.is_time_out, 
           time_in: class_attendance.time_in, 
-          current: class_attendance.created_date,
+          date_time_stamp: class_attendance.created_date,
           time_out: class_attendance.time_out
         })
         
