@@ -8,7 +8,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+export async function POST(request: Request) { // 127873170125
   const body = await request.json()
   
   const validate = ScannerCodeSchema.safeParse({...body, date: new Date(body.date)})
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       .where(
         and(
           eq(students.lrn, code), 
-          eq(class_attendance.attendance_date, sql`DATE(${now.toLocaleDateString()})`)
+          eq(class_attendance.attendance_date, sql`DATE(${new Intl.DateTimeFormat('en-US').format(now)})`)
         )
       )
       .groupBy(class_attendance.student_id, class_attendance.attendance_date).as('sq')
@@ -81,14 +81,14 @@ export async function POST(request: Request) {
         // insert time in attendance
         console.log('insert') 
         const insertTimeIn = await db.insert(class_attendance).values({
-          attendance_date: now.toISOString(),
+          attendance_date: new Intl.DateTimeFormat('en-US').format(now),
           is_time_out: false,
           time_in_procedure: 'Scan',
           created_by: user?.id as string,
           created_date: now,
           section_id: studentInfo[0].section_id,
           student_id: studentInfo[0].student_id,
-          time_in: now.toLocaleTimeString(),
+          time_in: new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
         }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
@@ -108,14 +108,14 @@ export async function POST(request: Request) {
       
       if(time_out) {
         const insertTimeOut = await db.insert(class_attendance).values({
-          attendance_date: now.toISOString(),
+          attendance_date: new Intl.DateTimeFormat('en-US').format(now),
           is_time_out: time_out,
           time_out_procedure: 'Scan',
           created_by: user?.id as string,
           created_date: now,
           section_id: studentInfo[0].section_id,
           student_id: studentInfo[0].student_id,
-          time_out: now.toLocaleTimeString(),
+          time_out:  new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
         }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
@@ -124,14 +124,14 @@ export async function POST(request: Request) {
       } else {
         
         const insertTimeIn = await db.insert(class_attendance).values({
-          attendance_date: now.toISOString(),
+          attendance_date: new Intl.DateTimeFormat('en-US').format(now),
           is_time_out: time_out,
           time_in_procedure: 'Scan',
           created_by: user?.id as string,
           created_date: now,
           section_id: studentInfo[0].section_id,
           student_id: studentInfo[0].student_id,
-          time_in: now.toLocaleTimeString(),
+          time_in:  new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
         }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
