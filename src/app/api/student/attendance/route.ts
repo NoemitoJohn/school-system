@@ -24,7 +24,7 @@ export async function POST(request: Request) { // 127873170125
     timeStyle: 'medium'
   }).format(now))
 
-
+  console.log('now', now)
   const cookieStore = cookies()
   const session = cookieStore.get('session')?.value
   
