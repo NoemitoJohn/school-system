@@ -40,6 +40,7 @@ export default function Scanner() {
 
     if (event.key === 'Enter') {
       console.log(42, scannerCode)
+
       const request = await fetch('api/student/attendance',{
         method: 'POST',
         body: JSON.stringify({code : scannerCode, date: new Date()})
@@ -58,7 +59,7 @@ export default function Scanner() {
       
       const timeOut = response.data.history.filter((v) => v.is_time_out)
       const timeIn = response.data.history.filter((v) => !v.is_time_out)
-      
+      console.log(response.data)
       setHistoryTimeIn(timeIn)
       setHistoryTimeOut(timeOut)
       setStudentInfo(response.data)
