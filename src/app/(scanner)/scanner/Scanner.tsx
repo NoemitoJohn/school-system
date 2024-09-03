@@ -39,6 +39,7 @@ export default function Scanner() {
     }
 
     if (event.key === 'Enter') {
+      console.log(42, scannerCode)
       const request = await fetch('api/student/attendance',{
         method: 'POST',
         body: JSON.stringify({code : scannerCode, date: new Date()})
