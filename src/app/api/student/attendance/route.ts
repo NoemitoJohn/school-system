@@ -19,15 +19,18 @@ export async function POST(request: Request) {
   
   const {code, date : now} = validate.data
   const cookieStore = cookies()
+  const session = cookieStore.get('session')?.value
+  
+  const user = await decrypt(session)
 
   try {
-    const attendance =  await db.transaction(async (tx) => {
+    const attendanceInfo =  await db.transaction(async (tx) => {
       const parent = alias(class_attendance, 'parent')
-
-      const subquery = await db.select({
-        max_date: sql<string>`MAX(${class_attendance.created_date})`.as('max_date'),
-        attendance_date: sql<string>`${class_attendance.attendance_date}`,
-        student_id: sql<string>`${class_attendance.student_id}`.as('student_id'),
+      // subquery get max created_date 
+      const subquery =  db.select({
+        max_date: sql<string>`MAX(${class_attendance.created_date})`.as('sq_max_date'),
+        attendance_date: sql<string>`${class_attendance.attendance_date}`.as('sq_attendance_date'),
+        student_id: sql<string>`${class_attendance.student_id}`.as('sq_student_id'),
       })
       .from(class_attendance)
       .innerJoin(students, eq(students.id, class_attendance.student_id))
@@ -37,60 +40,120 @@ export async function POST(request: Request) {
           eq(class_attendance.attendance_date, sql`DATE(${now.toLocaleDateString()})`)
         )
       )
-      .groupBy(class_attendance.student_id, class_attendance.attendance_date)
+      .groupBy(class_attendance.student_id, class_attendance.attendance_date).as('sq')
+      // main query
+      const latestAttendance = await db.select({
+        is_time_out: parent.is_time_out
+      }).from(subquery)
+      .innerJoin(parent, sql`${subquery.max_date} = ${parent.created_date} AND ${subquery.attendance_date} = ${parent.attendance_date} AND ${subquery.student_id} = ${parent.student_id}`)
+      
+      const studentInfo = await db.select(
+        {
+          student_id: students.id,
+          full_name: sql<string>`CONCAT(${students.last_name},', ',${students.first_name}, '. ',  COALESCE(${students.middle_name}, ''))`.as('full_name'),
+          grade_level: sql<string>`${grade_levels.level_name}`.as('grade_level'),
+          section_name: sql<string>`${sections.section_name}`.as('section_name'),
+          img_url: students.img_url,
+          section_id: sections.id,
+          school_year: enrolled_students.school_year
+        }
+      ).from(students).where(eq(students.lrn, code))
+      .innerJoin(enrolled_students, eq(enrolled_students.id, students.enrollment_id))
+      .innerJoin(sections, eq(sections.id, enrolled_students.section_id))
+      .innerJoin(grade_levels, eq(grade_levels.id, sql`CAST (${sections.grade_level_id} as TEXT)`))
 
-      console.log(subquery)
+      if(studentInfo.length === 0) return null; // return null if the scanned code is not valid
 
-      // const studentInfo = await tx.select({
-      //   student_id: students.id,
-      //   full_name: sql<string>`CONCAT(${students.last_name},', ',${students.first_name}, '. ',  COALESCE(${students.middle_name}, ''))`.as('full_name'),
-      //   grade_level: sql<string>`CONCAT(${grade_levels.level_name}, ': ', ${sections.section_name})`.as('grade_level'),
-      //   img_url: students.img_url,
-      //   section_id: sections.id,
-      //   school_year: enrolled_students.school_year
-      // }).from(students).where(eq(students.lrn, code))
-      // .innerJoin(enrolled_students, eq(enrolled_students.id, students.enrollment_id))
-      // .innerJoin(sections, eq(sections.id, enrolled_students.section_id))
-      // .innerJoin(grade_levels, eq(grade_levels.id, sql`CAST (${sections.grade_level_id} as TEXT)`))
+      const attendanceHistory = await db.select({
+        is_time_out : class_attendance.is_time_out,
+        time_in: class_attendance.time_in,
+        time_out: class_attendance.time_out,
+      }).from(class_attendance).where(and(eq(class_attendance.student_id, studentInfo[0].student_id), eq(class_attendance.attendance_date, sql`DATE(${now.toLocaleDateString()})`)))
 
-      // const student = studentInfo[0]
-      
-      // if(!student) { return null }
-      // let profile : string | null = null      
-      
-      // if(student.img_url)  {
-      //   const {data : {publicUrl}} = await supabase.storage.from('profile').getPublicUrl(student.img_url)
-      //   profile = publicUrl
-      // }
-      
-      // const session = cookieStore.get('session')?.value
-      
-      // const user = await decrypt(session)
-      
-      // await tx.insert(class_attendance).values({
-      //   attendance_date: now.toISOString(),
-      //   created_by: user?.id as string,
-      //   created_date: now,
-      //   section_id: student.section_id,
-      //   student_id: student.student_id,
-      //   time_in: now.toLocaleTimeString(),
-      //   updated_by: user?.id as string,
-      //   updated_date: now,
-      // })
+      let profile : string | null = null
 
-      // return {
-      //   full_name : student.full_name,
-      //   grade_level: student.grade_level,
-      //   school_year: student.school_year,
-      //   profile_url: profile 
-      // }
+      if(studentInfo[0].img_url)  {
+          const {data : {publicUrl}} = await supabase.storage.from('profile').getPublicUrl(studentInfo[0].img_url)
+          profile = publicUrl
+      }
+
+      if(latestAttendance.length === 0) {
+        // insert time in attendance
+        console.log('insert') 
+        const insertTimeIn = await db.insert(class_attendance).values({
+          attendance_date: now.toISOString(),
+          is_time_out: false,
+          time_in_procedure: 'Scan',
+          created_by: user?.id as string,
+          created_date: now,
+          section_id: studentInfo[0].section_id,
+          student_id: studentInfo[0].student_id,
+          time_in: now.toLocaleTimeString(),
+          updated_by: user?.id as string,
+          updated_date: now,
+        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        
+        return {
+          full_name : studentInfo[0].full_name,
+          grade_level: studentInfo[0].grade_level,
+          school_year:  studentInfo[0].school_year,
+          section_name: studentInfo[0].section_name,
+          profile_url: profile,
+          history: [...attendanceHistory, ...insertTimeIn]
+        }
+      }
+      
+      const time_out = !latestAttendance[0].is_time_out
+      let addedAttendance : { is_time_out: boolean | null; time_in: string | null; time_out: string | null; }[] = [] 
+      
+      if(time_out) {
+        const insertTimeOut = await db.insert(class_attendance).values({
+          attendance_date: now.toISOString(),
+          is_time_out: time_out,
+          time_out_procedure: 'Scan',
+          created_by: user?.id as string,
+          created_date: now,
+          section_id: studentInfo[0].section_id,
+          student_id: studentInfo[0].student_id,
+          time_out: now.toLocaleTimeString(),
+          updated_by: user?.id as string,
+          updated_date: now,
+        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        
+        addedAttendance = insertTimeOut
+      } else {
+        
+        const insertTimeIn = await db.insert(class_attendance).values({
+          attendance_date: now.toISOString(),
+          is_time_out: time_out,
+          time_in_procedure: 'Scan',
+          created_by: user?.id as string,
+          created_date: now,
+          section_id: studentInfo[0].section_id,
+          student_id: studentInfo[0].student_id,
+          time_in: now.toLocaleTimeString(),
+          updated_by: user?.id as string,
+          updated_date: now,
+        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        
+        addedAttendance = insertTimeIn
+      }
+      
+      return {
+        full_name : studentInfo[0].full_name,
+        grade_level: studentInfo[0].grade_level,
+        section_name: studentInfo[0].section_name,
+        school_year:  studentInfo[0].school_year,
+        profile_url: profile,
+        history: [...attendanceHistory, ...addedAttendance]
+      }
     })
-
-    return NextResponse.json({success: true, data: attendance})
-
-    // if(!attendance) { return NextResponse.json({success: false}) }
+    console.log(170, attendanceInfo)
     
-
+    if(attendanceInfo == null) { return NextResponse.json({success: false, message: 'Cant find student info in enrolled list!'})}
+    
+    return NextResponse.json({success: true, data: attendanceInfo})
+    
   } catch (error) {
     console.log(error)
     return NextResponse.error() 
