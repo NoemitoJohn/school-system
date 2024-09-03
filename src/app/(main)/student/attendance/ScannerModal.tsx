@@ -24,12 +24,12 @@ type TScannerResponse = {
 export default function ScannerModal({ onSubmit: onSubmit ,...props} : TScannerModal) {
   const [studentInfo, setStudentInfo] = useState<TScannerResponse>()
 
-  const {register, handleSubmit, setFocus, resetField} = useForm<TScannerCodeSchema>({
+  const {register, handleSubmit, setFocus, resetField, setValue} = useForm<TScannerCodeSchema>({
     resolver: zodResolver(ScannerCodeSchema)
   })
 
   const handleScannerSubmit : SubmitHandler<TScannerCodeSchema> = async (data) =>{
-    
+    // return console.log(JSON.stringify(data))
     const request = await fetch('/api/student/attendance', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -82,7 +82,7 @@ export default function ScannerModal({ onSubmit: onSubmit ,...props} : TScannerM
       <form onSubmit={handleSubmit(handleScannerSubmit)}>
         <div className='flex gap-2'>
           <Input {...register('code')} placeholder='Scanner Code'/>
-          <Button size='sm' type='submit'><ScanBarcode size={18}/></Button> 
+          <Button size='sm' type='submit' onClick={() => setValue('date', new Date())}><ScanBarcode size={18}/></Button> 
         </div>
       </form>
     </Modal>
