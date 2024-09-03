@@ -45,10 +45,16 @@ export default function Scanner() {
         body: JSON.stringify({code : scannerCode, date: new Date()})
       })
       
-      if(!request.ok) { return toast.error('Something went wrong!') }
+      if(!request.ok) { 
+        setScannerCode('')
+        return toast.error('Something went wrong!')
+      }
       
       const response : {success: boolean, data: TScanerResponse, message: string} = await request.json()
-      if(!response.success) { return toast.error(response.message) }
+      if(!response.success) { 
+        setScannerCode('')
+        return toast.error(response.message)
+      }
       
       const timeOut = response.data.history.filter((v) => v.is_time_out)
       const timeIn = response.data.history.filter((v) => !v.is_time_out)
