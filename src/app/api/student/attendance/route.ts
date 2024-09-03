@@ -18,6 +18,13 @@ export async function POST(request: Request) { // 127873170125
   }
   
   const {code, date : now} = validate.data
+  
+  console.log('format-data',new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'short',
+    timeStyle: 'medium'
+  }).format(now))
+
+  console.log('now', now)
   const cookieStore = cookies()
   const session = cookieStore.get('session')?.value
   
@@ -66,10 +73,15 @@ export async function POST(request: Request) { // 127873170125
 
       const attendanceHistory = await db.select({
         is_time_out : class_attendance.is_time_out,
+        date_time_stamp: class_attendance.created_date,
         time_in: class_attendance.time_in,
         time_out: class_attendance.time_out,
-      }).from(class_attendance).where(and(eq(class_attendance.student_id, studentInfo[0].student_id), eq(class_attendance.attendance_date, sql`DATE(${now.toLocaleDateString()})`)))
-
+      }).from(class_attendance).where(
+        and(
+          eq(class_attendance.student_id, studentInfo[0].student_id), 
+          eq(class_attendance.attendance_date, sql`DATE(${new Intl.DateTimeFormat('en-US').format(now)})`)
+        )
+      )
       let profile : string | null = null
 
       if(studentInfo[0].img_url)  {
@@ -91,7 +103,12 @@ export async function POST(request: Request) { // 127873170125
           time_in: new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
-        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        }).returning( {
+          is_time_out: class_attendance.is_time_out, 
+          time_in: class_attendance.time_in, 
+          date_time_stamp: class_attendance.created_date,
+          time_out: class_attendance.time_out
+        })
         
         return {
           full_name : studentInfo[0].full_name,
@@ -118,7 +135,12 @@ export async function POST(request: Request) { // 127873170125
           time_out:  new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
-        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        }).returning( {
+          is_time_out: class_attendance.is_time_out, 
+          time_in: class_attendance.time_in, 
+          date_time_stamp: class_attendance.created_date,
+          time_out: class_attendance.time_out
+        })
         
         addedAttendance = insertTimeOut
       } else {
@@ -134,7 +156,12 @@ export async function POST(request: Request) { // 127873170125
           time_in:  new Intl.DateTimeFormat('en-US', { timeStyle: 'medium' }).format(now),
           updated_by: user?.id as string,
           updated_date: now,
-        }).returning( {is_time_out: class_attendance.is_time_out, time_in: class_attendance.time_in, time_out: class_attendance.time_out} )
+        }).returning({
+          is_time_out: class_attendance.is_time_out, 
+          time_in: class_attendance.time_in, 
+          date_time_stamp: class_attendance.created_date,
+          time_out: class_attendance.time_out
+        })
         
         addedAttendance = insertTimeIn
       }
