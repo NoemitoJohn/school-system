@@ -21,7 +21,7 @@ type TScanerResponse = {
 }
 
 export default function Scanner() {
-  const [scannerCode, setScannerCode] = useState('127873170125'); 
+  const [scannerCode, setScannerCode] = useState(''); 
   const [studentInfo, setStudentInfo] = useState<TScanerResponse>();
   const [historyTimeIn, setHistoryTimeIn] = useState<TAttendanceHistory[]>();
   const [historyTimeOut, setHistoryTimeOut] = useState<TAttendanceHistory[]>();
@@ -64,7 +64,7 @@ export default function Scanner() {
       setHistoryTimeIn(timeIn)
       setHistoryTimeOut(timeOut)
       setStudentInfo(response.data)
-      
+
       setScannerCode('')
     }
   }
