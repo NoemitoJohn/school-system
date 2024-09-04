@@ -1,6 +1,6 @@
 'use client'
 import { ImageOff } from 'lucide-react';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast';
 
 
@@ -22,22 +22,34 @@ type TScanerResponse = {
 
 export default function Scanner() {
   const [scannerCode, setScannerCode] = useState(''); 
+  const inputScanRef = useRef<HTMLInputElement>(null)
   const [studentInfo, setStudentInfo] = useState<TScanerResponse>();
   const [historyTimeIn, setHistoryTimeIn] = useState<TAttendanceHistory[]>();
   const [historyTimeOut, setHistoryTimeOut] = useState<TAttendanceHistory[]>();
   
-  useEffect(() => {
-    document.body.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.body.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [scannerCode]);
-
-  const handleKeyDown = async (event: KeyboardEvent) => {
-    if (event.key.length === 1) {
-      setScannerCode((prevBuffer) => prevBuffer + event.key);
+  const handleBodyClick = () => { 
+    if(inputScanRef.current) {
+      inputScanRef.current.focus()
     }
+  }
+
+  useEffect(() => {
+
+    if(inputScanRef.current) {
+      inputScanRef.current.focus()
+    }
+
+    // document.body.addEventListener('keydown', handleKeyDown);
+    document.body.addEventListener('click', handleBodyClick)
+    return () => {
+      // document.body.removeEventListener('keydown', handleKeyDown);
+      document.body.removeEventListener('click', handleBodyClick)
+    };
+  }, []);
+  
+
+
+  const handleKeyDown = async (event : React.KeyboardEvent<HTMLInputElement>) => {
 
     if (event.key === 'Enter') {
       console.log(42, scannerCode)
@@ -47,9 +59,11 @@ export default function Scanner() {
         body: JSON.stringify({code : scannerCode, date: new Date()})
       })
       
+      setScannerCode('')
+
       if(!request.ok) { 
         setScannerCode('')
-        return toast.error('Something went wrong!')
+        return toast.error('Something went wrong!') // 127873170125, 131315220160
       }
       
       const response : {success: boolean, data: TScanerResponse, message: string} = await request.json()
@@ -65,12 +79,13 @@ export default function Scanner() {
       setHistoryTimeOut(timeOut)
       setStudentInfo(response.data)
 
-      setScannerCode('')
     }
   }
 
   return (
     <>
+      <input ref={inputScanRef} className='absolute left-[-9999px]' value={scannerCode} onChange={(e) => setScannerCode(e.target.value) 
+        } onKeyDown={handleKeyDown}/>
       <div className='grid grid-cols-3 h-full gap-4 '>
         <div className='row-span-4'>
           {studentInfo?.profile_url ? 
