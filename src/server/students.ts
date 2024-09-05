@@ -1,5 +1,4 @@
 'use server'
-import readXlsxFile from 'read-excel-file/node'
 import { TEnromentStudent } from "@/components/EnrollmentSearch"
 import { db } from "@/database/db"
 import { enrolled_students, grade_levels, sections, students } from "@/database/schema"
@@ -8,7 +7,7 @@ import { TStudentEnrollmentSchema } from "@/validation/schema"
 import { and, asc, desc, eq, gt, gte, ilike, isNull, like, lt, lte, max, ne, or, sql, } from "drizzle-orm"
 import { alias } from "drizzle-orm/pg-core"
 import { revalidatePath } from "next/cache"
-
+// TODO: ADD BARRIER
 
 export async function getStudentEnrollment() {
 
@@ -211,6 +210,3 @@ export async function insertEnrollment(data : TStudentEnrollmentSchema) {
 }
 
 
-export async function addStudentFromXLXS(buffer: ArrayBuffer) {
-  // readXlsxFile().then(row => console.log(row)).catch((e) => console.log(e))
-}

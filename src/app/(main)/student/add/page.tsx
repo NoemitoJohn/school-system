@@ -1,4 +1,4 @@
-import StudentForm from '@/components/StudentForm'
+import StudentFormComponent from '@/components/StudentFormComponent'
 import React from 'react'
 import provinceJSON from '@/address/province.json'
 import cityJSON from '@/address/city.json'
@@ -36,7 +36,7 @@ export default async function StudentAdd() {
   return (
     <div>
       <MarginContainer>
-        <StudentForm provinces={provinces} city={city} barangay={barangay}/>
+        <StudentFormComponent provinces={provinces} city={city} barangay={barangay}/>
       </MarginContainer>
     </div>
   )

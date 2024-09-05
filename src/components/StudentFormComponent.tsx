@@ -6,46 +6,57 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import toast from 'react-hot-toast';
 import { Button } from './ui/button'
-import { StudentSchema, TStudent } from "@/validation/schema";
+import { StudentSchema, TStudent} from "@/validation/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addStudent } from "@/server/actions/actions";
+import { addStudent, updateStudent } from "@/server/actions/actions";
 import Dropdown from "./Dropdown";
 import { TBarangay, TCity, TProvince } from "@/app/(main)/student/add/page";
-import { ChangeEvent, useState } from "react";
-import useSWRMutation from "swr/mutation";
-import { useRouter } from "next/navigation";
 
-
-
-
-export default function StudentForm({provinces, city, barangay} : {provinces : TProvince[], city : TCity[], barangay : TBarangay[]}) {
-  
+export default function StudentFormComponent({provinces, city, barangay, studentId: studentId} : {provinces : TProvince[], city : TCity[], barangay : TBarangay[], studentId?: string}) {
+    
   const {
     register,
     handleSubmit,
     control,
     watch,
     reset,
-    formState : {errors, isSubmitting}
+    formState : {errors, isSubmitting, isLoading}
   } = useForm<TStudent>({
-    resolver : zodResolver(StudentSchema)
+    resolver : zodResolver(StudentSchema),
+    
+    defaultValues : async () => {
+      if(!studentId) {
+        const noValue : any = {}
+        return noValue
+      }
+      const request =  await fetch(`/api/student/edit/${studentId}`)
+      const response : {success: boolean, data : TStudent} = await request.json()
+      return response.data
+    }
   })
-
-
-
   const onSubmit : SubmitHandler<TStudent> = async (data) => {
 
     const file =  data.profile_pic?.[0] as File
     const formData = new FormData()
+
     formData.append('fileImage', file)
-    const response = await addStudent({...data, profile_pic : formData})
     
-    if(response?.error) {
-      return toast.error(response.error)
+    if(!studentId) {
+      const response = await addStudent({...data, profile_pic : formData})
+      if(response?.error) {
+        return toast.error(response.error)
+      }
+  
+      reset()
+      return toast.success('Save Successfully')
+      
     }
 
-    toast.success('Save Successfully')
-    reset()
+    const response = await updateStudent({...data, profile_pic : formData})
+    
+    if(response?.error) { return toast.error(response.error)}
+
+    return toast.success('Update Successfully')
   }
 
 
@@ -54,6 +65,12 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
 
   const cities = city.filter(c => c.province_code === proviceCode)
   const barangays = barangay.filter(b => b.city_code === cityCode)
+
+  if(isLoading) {
+    return <div>Loading...</div>
+  }
+
+
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -118,8 +135,25 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
           <div className="border-slate-400 border-b">
             <p className='font-bold'>Parent Information</p>
           </div>
-          <p className='font-medium text-xs mt-2'>Father&apos;s Name</p>
-          <div className="flex flex-col gap-2 md:flex-row md:gap-4">
+          {/* <p className='font-medium text-xs mt-2'>Father&apos;s Name</p> */}
+          <div className="flex gap-2 flex-col md:flex-row md:gap-4 mt-2">
+            <div className='flex-1'>
+              <Label className='text-sm block '>Father's Full Name </Label>
+              <Label className='text-xs block  '>(Last Name, Middle Name, First Name)</Label>
+              <Input {...register("parent.father")} placeholder='Last Name'/>
+            </div>
+            <div className='flex-1'>
+              <Label className='text-sm  block'>Mother's Full Name </Label>
+              <Label className='text-xs block'>(Last Name, Middle Name, First Name)</Label>
+              <Input {...register("parent.mother")} placeholder='Last Name'/>
+            </div>
+            <div className='flex-1'>
+              <Label className='text-sm block '>Guardian&apos;s Full Name </Label>
+              <Label className='text-xs block  '>(Last Name, Middle Name, First Name)</Label>
+              <Input {...register("parent.guardian")} placeholder='Last Name'/>
+            </div>
+          </div>
+          {/* <div className="flex flex-col gap-2 md:flex-row md:gap-4">
             <div className='flex-1'>
               <Label className='text-xs'>Last Name</Label>
               <Input {...register("parent.father.last_name")}  placeholder='Last Name'/>
@@ -136,10 +170,10 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
               <Label className='text-xs'>Name Extension (eg Jr)</Label>
               <Input  {...register("parent.father.ext_name")} placeholder='Extension Name'/>
             </div>
-          </div>
-          <p className='font-medium text-xs mt-2'>Mother&apos;s Maiden Name</p>
+          </div> */}
+          {/* <p className='font-medium text-xs mt-2'>Mother&apos;s Maiden Name</p> */}
           
-          <div className="flex flex-col gap-2 md:flex-row md:gap-4">
+          {/* <div className="flex flex-col gap-2 md:flex-row md:gap-4">
             <div className='flex-1'>
               <Label className='text-xs'>Last Name</Label>
               <Input {...register("parent.mother.last_name")} placeholder='Last Name'/>
@@ -152,9 +186,9 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
               <Label className='text-xs'>Middle Name</Label>
               <Input  {...register("parent.mother.middle_name")} placeholder='Middle Name'/>
             </div>
-          </div>
-          <p className='font-medium text-xs mt-2'>Guardian&apos;s Name</p>
-          <div className="flex flex-col gap-2 md:flex-row md:gap-4">
+          </div> */}
+          {/* <p className='font-medium text-xs mt-2'>Guardian&apos;s Name</p> */}
+          {/* <div className="flex flex-col gap-2 md:flex-row md:gap-4">
             <div className='flex-1'>
               <Label className='text-xs'>Last Name</Label>
               <Input {...register("parent.guardian.last_name")} placeholder='Last Name'/>
@@ -167,7 +201,7 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
               <Label className='text-xs'>Middle Name</Label>
               <Input  {...register("parent.guardian.middle_name")} placeholder='Middle Name'/>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className='mt-3'>
@@ -231,8 +265,6 @@ export default function StudentForm({provinces, city, barangay} : {provinces : T
                     </>
                   )}
                 />
-                {/* <Label className="text-xs">Barangay</Label>
-                <Input {...register("address.barangay")} placeholder="Barangay"/> */}
               </div>
               <div className="flex-1">
                 <Label className="text-xs">House#/Street/Sitio/Purok</Label>

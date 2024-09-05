@@ -1,7 +1,7 @@
 'use client';
 import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { FileSpreadsheet, Search } from 'lucide-react';
+import { Button, buttonVariants } from './ui/button';
+import { FileSpreadsheet, Pen, Search } from 'lucide-react';
 import { ColumnDef, getCoreRowModel } from "@tanstack/react-table";
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { searchStudentEnrollment } from '@/server/students';
@@ -14,6 +14,8 @@ import DataTableCustomHook from './DataTableCustomHook';
 
 import ModalStudentInfo from '@/app/(main)/student/enrollment/ModalStudentInfo';
 import ModalUploadXlxs from '@/app/(main)/student/enrollment/ModalUploadXlxs';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export type TEnromentStudent = {
   id: string
@@ -88,7 +90,6 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const [openStudentInfo, setOpenStudentInfo] = useState(false)
   const [openUploadXlsx, setOpenUploadXlsx] = useState(false)
 
-  const router = useRouter()
   
   useEffect(() => {
     dispatchStudentEnrollment({action : 'INIT', students : rows})
@@ -122,13 +123,22 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
     },
     {
       id : 'actions',
-      header : 'Actions',
+      header : (p) => (
+        <div className='flex justify-center'>Action</div>
+      ),
       cell : ({row}) => {
         const original = row.original
         return(
-          <Button variant='link' size='sm' className='h-0' onClick={() => handleEnrollButtonClick(original.id)}>
-            Enroll
-          </Button>
+          <div className='flex items-center'>
+            {/* <Button variant='ghost' size='sm' className="px-2 py-0 bg-transparent rounded-lg" onClick={() => console.log(original.id)}>
+            </Button> */}
+            <Link href={`/student/edit/${original.id}`} className={cn(buttonVariants({variant : 'ghost', size: 'sm'}), 'p-0')}>
+              <Pen size={20} color="hsl(var(--primary))"/>
+            </Link>
+            <Button variant='link' size='sm' className='h-0' onClick={() => handleEnrollButtonClick(original.id)}>
+              Enroll
+            </Button>
+          </div>
         )
       }
     }
@@ -137,6 +147,7 @@ export default function Enrollment({rows, sections, gradeLevel} : {rows : TEnrom
   const studentTable = useDataTable({
     data : state,
     columns : columns,
+    enableRowSelection : false,
     getCoreRowModel : getCoreRowModel()
   })
 
