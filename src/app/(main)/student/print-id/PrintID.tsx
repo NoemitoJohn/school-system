@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
 import { RotateCcw, Search } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { useRoleContext } from '@/context/RoleContextProvider';
 
 
 
@@ -169,12 +170,11 @@ const generateID = (students : TStudentID[]) => {
   return URL.createObjectURL(blob)
 }
 
-
 export default function PrintID({rows}: {rows : TStudentID[]}) {
   const [students, setStudents] = useState(rows)
   const [selectionState, setSelectionState] = useState<Record<string, boolean>>({})
   const { trigger, isMutating } = useSWRMutation('/api/student-id/print', fetcher)
-
+  const role = useRoleContext()
   const {
     register,
     handleSubmit,

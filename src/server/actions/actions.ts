@@ -7,6 +7,7 @@ import { eq, param } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { nanoid } from 'nanoid'
 import QRCode from 'qrcode';
+import { error } from "console"
 
 const upload = async (file : File) : Promise<string> =>{
   const fileName = nanoid()
@@ -47,9 +48,9 @@ export const addStudent =  async (data : TStudent) => {
       gender : data.gender,
       birth_date : data.birthdate,
       religion : data.religion,
-      father_name : `${data.parent.father.last_name}, ${data.parent.father.first_name} ${data.parent.father.middle_name} .${data.parent.father.ext_name}`,
-      mother_name : `${data.parent.mother.last_name}, ${data.parent.mother.first_name} ${data.parent.mother.middle_name}`,
-      guardian_name : `${data.parent.guardian.last_name}, ${data.parent.guardian.first_name} ${data.parent.guardian.middle_name}`,
+      father_name : data.parent.father?.toUpperCase(),
+      mother_name : data.parent.mother?.toUpperCase(),
+      guardian_name : data.parent.guardian?.toUpperCase(),
       province : data.address.province,
       city_municipality : data.address.city,
       barangay : data.address.barangay,
@@ -67,6 +68,48 @@ export const addStudent =  async (data : TStudent) => {
   revalidatePath('/student/enrollment')
 }
 
+export const updateStudent = async (data : TStudent) => {
+  const {success, data : parse} = StudentSchema.safeParse(data)
+  
+  if(!success) return {error : 'Invalid Inputs'};
+  
+  try {
+    const formData = data.profile_pic as FormData
+    const file = formData.get('fileImage') as File
+
+    const fileName =  await upload(file)
+
+    const updateInfo = await db.update(students).set({
+      lrn : data.lrn,
+      first_name : data.first_name,
+      middle_name : data.middle_name, 
+      last_name : data.last_name,
+      ext_name : data.ext_name,
+      gender : data.gender,
+      birth_date : data.birthdate,
+      religion : data.religion,
+      father_name : data.parent.father?.toUpperCase(),
+      mother_name : data.parent.mother?.toUpperCase(),
+      guardian_name : data.parent.guardian?.toUpperCase(),
+      province : data.address.province,
+      city_municipality : data.address.city,
+      barangay : data.address.barangay,
+      street_address : data.address.house_num,
+      img_url : fileName,
+      parent_mobile_number : data.contact_num,
+    }).where(eq(students.id, parse.id!)).returning({id : students.id})
+  
+    if(updateInfo[0].id) {
+      return { error : null}
+    }
+
+    revalidatePath('/student')
+  } catch (error) {
+    return {
+      error : 'Something Went Wrong'
+    }
+  }
+}
 
 export const addClass  = async (data : TClassSchema) => {
   try {

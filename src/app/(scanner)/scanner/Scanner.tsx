@@ -80,8 +80,7 @@ export default function Scanner() {
       setHistoryTimeIn(timeIn)
       setHistoryTimeOut(timeOut)
       setStudentInfo(response.data)
-      
-      timer = setTimeout(() => setStudentInfo(undefined), 1000 * 15)
+      timer = setTimeout(() => setStudentInfo(undefined), 1000 * 15) // not working properly
     }
   }
 
